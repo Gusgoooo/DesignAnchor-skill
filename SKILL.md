@@ -455,9 +455,51 @@ Apply the matched style prompt as the aesthetic layer across the entire page. Th
 4. **Apply surface and depth** — shadow approach, border treatment, border radius, surface layering per the prompt's philosophy.
 5. **Apply signature elements** — 2-3 distinctive visual choices from the prompt that give the page its recognizable personality.
 6. **Apply decorative touches** — subtle section background tints, accent borders, card treatments, gradient accents where the prompt specifies.
-7. **Verify visual quality** — the page looks professionally designed for this specific product. Run the Visual Quality Checklist from `style-prompt-guidance.md`.
+7. **Visual Enhancement Pass (视觉增强轮)** — after applying the style prompt's base layer, scan the page for opportunities to add visual polish. This is what separates "functional with colors" from "professionally designed."
 
-Output of Phase 3: a complete, visually polished page that looks like it was designed by a professional for this specific product.
+   **Surface & Background:**
+   - Subtle gradient backgrounds on page or section level (aligned with style prompt palette, not random)
+   - Section-to-section color temperature shifts (e.g., slightly warmer or cooler tints between sections)
+   - Dot grid, noise texture, or subtle pattern as page background when the style supports it
+   - Content area with a slight inset or paper-like surface against the page background
+
+   **Sidebar Enhancement:**
+   - Floating sidebar: rounded corners, elevated shadow, margin from page edges — visually separated from the content as its own layer
+   - Glassmorphic or tinted sidebar background when the style prompt supports blur/glass effects
+   - Sidebar and content area should have visible depth difference — the sidebar is not just a colored column, it's a distinct spatial layer
+
+   **Card & Grid Layout:**
+   - Bento-style unequal grid for dashboard metrics — key metrics get larger cards, secondary ones smaller
+   - Featured/primary cards with accent background, border highlight, or subtle glow
+   - Card hover: micro lift (`translateY(-2px)`) + shadow deepen, transition `ease-out 150ms`
+   - Cards with varied visual weight — not all cards identical in size and treatment
+
+   **Borders & Dividers:**
+   - Gradient borders on featured elements (primary cards, active sidebar items, hero inputs)
+   - Accent color strip or top-border on section headers
+   - Refined dividers: hairline with gradient fade-out at edges, not solid full-width lines
+
+   **Depth & Dimension:**
+   - Multi-layer shadows on elevated elements (not just `shadow-md` but layered soft + sharp shadows)
+   - Clear elevation hierarchy: page bg → card surface → popover/modal → toast
+   - Backdrop blur on overlays and floating elements
+
+   **Micro-motion:**
+   - Hover lift on interactive cards and buttons (`translateY` + shadow change)
+   - Smooth state transitions (`transition-all duration-150 ease-out`) on interactive elements
+   - Skeleton shimmer animation on loading states
+   - Subtle scale feedback on button press (`active:scale-[0.98]`)
+
+   **Rules for this pass:**
+   - Pick 3-5 enhancements per page that best fit the style prompt. Do not apply all of them everywhere.
+   - Functional pages: enhancements are subtle and professional. The user should feel "this is polished" without being able to point to why.
+   - All enhancements must be consistent with the style prompt's visual direction. A minimal Swiss style gets clean shadows and subtle tints, not glassmorphism and gradient borders.
+   - Do not add enhancements that conflict with the page's density. Dense monitoring pages get minimal surface treatment; spacious settings pages can afford more.
+   - Dark mode: all enhancements must work in dark mode if enabled. Gradient tints, shadows, and surface treatments need dark-mode-appropriate values.
+
+8. **Verify visual quality** — the page looks professionally designed for this specific product. Run the Visual Quality Checklist from `style-prompt-guidance.md`.
+
+Output of Phase 3: a complete, visually polished page with intentional visual enhancements that looks like it was designed by a professional for this specific product — not just a colored wireframe.
 
 **The three phases are sequential and non-negotiable.** Phase 1 without Phase 3 produces a wireframe. Phase 3 without Phase 1 produces a pretty mess. Phase 2 without Phase 3 produces a generic component library demo.
 

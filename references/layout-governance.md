@@ -252,13 +252,99 @@ These are interaction primitives where accessibility, focus management, and keyb
 - Must have: proper positioning, focus management, dismissal behavior.
 - Install: `npx design-anchor add popover`, `npx design-anchor add sheet`, `npx design-anchor add tooltip`.
 
-### Presentational Components — AI Freely Designs
+### Presentational Components — AI Freely Designs, But Has Quality Standards
 
 All visual/display components are freely designed based on the style prompt. No mandatory library, no forced structure. The token system constrains structural colors; everything else is creative freedom.
 
-This includes: sidebar appearance, data tables, cards, stat blocks, navigation chrome, form layout, app shell structure, hero sections, dashboard components, and any component whose primary value is visual.
+**But "freely designed" does not mean "anything goes."** Each presentational component has quality criteria. When a component fails these criteria, redesign it freely based on the style prompt — not by installing a library component, but by writing a better version that fits this product's visual personality.
 
-**Design quality standard:** Each presentational component should look like it was specifically designed for this product — using the style prompt's color palette, typography, shadow approach, and signature elements. Not a library default, not a generic template.
+#### Sidebar / Navigation
+
+A sidebar is the backbone of product navigation. A bad sidebar makes the entire product feel amateur.
+
+**Quality criteria:**
+- Collapsible to icon-only mode with a toggle control.
+- Grouped navigation items with section labels (e.g., "Main", "Settings", "Admin").
+- Active route highlighted with a clear visual indicator — background color or left border, not just font weight.
+- Icons consistent in library, size, and style — one icon per nav item, aligned.
+- Nested items with expandable/collapsible groups for deep navigation.
+- User/org section at bottom or top with avatar, name, and account menu.
+- Responsive: on mobile, sidebar becomes a drawer or sheet overlay (use Design Anchor `sheet` for the overlay behavior).
+- Keyboard accessible: focusable items, arrow key navigation.
+- Uses semantic tokens for structural colors — no hardcoded hex for primary/active states.
+
+**Redesign when:**
+- Sidebar is a flat `<ul>` or plain `<a>` tags with no grouping, collapse, or active state.
+- Mixed icon sizes or icon libraries within the sidebar.
+- No collapse behavior on any screen size.
+- Hardcoded colors that don't respond to theme changes.
+- Navigation items are buttons with `onClick` doing `router.push` instead of proper `<Link>` elements.
+
+#### Data Table
+
+Tables are the most common component in product UIs and the most commonly botched.
+
+**Quality criteria:**
+- Column headers with sort indicators (ascending/descending/unsorted).
+- Row selection with checkboxes (header checkbox for select-all).
+- Status displayed as semantic badges with color coding — never plain text.
+- Row actions in a single dropdown menu (`⋯` trigger) — never a row of inline icons.
+- Pagination with page count, current page, page size selector, and total count.
+- Empty state with explanation and primary action.
+- Loading state with skeleton rows — never a spinner replacing the entire table.
+- Responsive: horizontal scroll with sticky first column, or card-based layout on small screens.
+- Column widths proportional to content — name columns wider than status columns.
+
+**Redesign when:**
+- Inline icon buttons for each row action (icon soup).
+- No empty state — just blank when no data.
+- No loading state or full-page spinner.
+- Status rendered as unstyled text strings.
+- No sort capability on sortable columns.
+- Pagination missing or only "Load more".
+
+#### Form
+
+**Quality criteria:**
+- Every field has a visible label — never placeholder-only labels.
+- Related fields grouped in sections with section headings.
+- Field descriptions for non-obvious inputs (below the field, muted).
+- Inline validation on blur — error message below the field with destructive color.
+- Consistent field spacing using a form layout pattern, not ad-hoc margins.
+- Submit and cancel actions in a sticky footer on long forms.
+- Disabled state for submit button during submission, with loading indicator.
+
+**Redesign when:**
+- Fields have no visible labels (placeholder-only).
+- Validation only triggers on submit with a list at the top.
+- No section grouping — all fields in a flat list.
+- Submit button scrolls out of view on long forms.
+- Fields use raw `<input>` without wrapper, label, or error display.
+
+#### App Shell / Layout
+
+**Quality criteria:**
+- Consistent structure across pages: sidebar + header + content area (or appropriate variation).
+- Sidebar and content area do not shift or rearrange between pages.
+- Content area fills available space and handles its own scrolling.
+- Header stays fixed or sticky at top.
+- Responsive: sidebar collapses on small viewports; content area adapts.
+- No nested scroll containers that fight with each other.
+
+**Redesign when:**
+- Each page defines its own header and sidebar independently — no shared shell.
+- Layout uses ad-hoc flex/grid divs with hardcoded pixel widths.
+- Content area nested inside multiple scroll containers.
+- Sidebar width changes between pages or routes.
+
+#### General Rule
+
+When any presentational component fails its quality criteria, the AI should:
+1. Flag it in the audit or restructuring analysis.
+2. Redesign it freely based on the style prompt — use the product's color palette, typography, shadow approach, and signature elements.
+3. Preserve all data bindings, event handlers, routes, and business logic from the original.
+4. Prefer open-source blocks (shadcn blocks, shadcn-admin, Kibo UI, etc.) as structural starting points when they match, then customize extensively with the style prompt.
+5. The result should look like it was custom-designed for this specific product — not a library default.
 
 **Token constraint applies to all.** Whether functional or presentational, structural colors (primary, CTA, status, foreground, background) must reference token CSS variables. Decorative colors, gradients, shadows, and accents are free.
 

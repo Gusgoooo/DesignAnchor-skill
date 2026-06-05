@@ -126,7 +126,12 @@ For each page or major route:
 ### Component Audit
 
 - **Functional components**: Check dialog, command, select, popover, sheet, tooltip, tabs. If they lack accessibility (focus trap, keyboard nav, ARIA), note for Design Anchor replacement.
-- **Presentational components**: Assess visual quality and consistency. Note which ones would benefit from redesign based on the style prompt. No mandatory library replacement — AI will freely redesign them.
+- **Presentational components**: Evaluate each against the quality criteria in `layout-governance.md`. Specifically check:
+  - **Sidebar**: has collapse? grouped items? active state? consistent icons? responsive? keyboard accessible?
+  - **Data tables**: has sort? row actions in dropdown (not inline icons)? empty state? loading state? status as badges? pagination?
+  - **Forms**: visible labels (not placeholder-only)? grouped sections? inline validation? sticky submit on long forms?
+  - **App shell**: consistent across pages? shared layout? no nested scroll fights? responsive sidebar?
+  - Flag components that fail quality criteria for redesign. The redesign is free (AI designs based on style prompt, no mandatory library) — but the detection must be thorough.
 - Identify raw `<div>` modals, custom dropdowns, or manual select implementations that should use Design Anchor functional primitives.
 
 ### Icon Audit
@@ -203,23 +208,37 @@ Before starting any page work, ensure a style prompt is active. This prompt driv
 **Phase 1 — Layout Blueprint:**
 
 1. **Read the page source completely.** Understand every component, every data binding, every event handler.
-2. **Identify the page's primary user task** and evaluate the current layout against the quality principles.
-3. **Select the best layout block** for this page's purpose (Dashboard, List, Detail, Form, Settings, Chat, Canvas, Split — see SKILL.md Page Rendering Pipeline). Do not force-fit — modify the block based on actual needs, then verify against quality principles.
+2. **Classify page nature** — Functional（工具型）or Showcase（展示型）. Default is Functional. See SKILL.md Phase 1 for criteria.
+3. **Identify the page's primary user task** and evaluate the current layout against the quality principles.
+4. **Match an open-source block as the page scaffold.** This is the default workflow, not optional:
+   - Dashboard / sidebar / settings / auth → shadcn/ui blocks
+   - Admin CRUD / data tables → shadcn-admin
+   - Extended patterns → Kibo UI
+   - Landing / showcase pages → Launch UI
+   - E-commerce → Commerce UI
+   - Use the matched block's structure (layout, spacing, responsive breakpoints, component arrangement) as the new page skeleton. Modify freely based on actual needs, but start from a production-quality scaffold, not from scratch.
+   - Only design from zero when no block matches. Even then, combine patterns from multiple blocks.
 
 **Phase 2 — Component Composition:**
 
-4. **Functional components**: Replace raw HTML modals, custom dropdowns, manual selects with Design Anchor functional primitives (`dialog`, `command`, `select`, `popover`, `tabs`). These provide focus trap, keyboard nav, and ARIA roles.
-5. **Presentational components**: Freely redesign all visual/display components based on the style prompt. When an open-source block matches the page type (shadcn blocks for dashboard/auth/settings, shadcn-admin for admin CRUD, Kibo UI for extended patterns, Launch UI for landing sections — see SKILL.md Phase 2 for full priority list), prefer it as the structural starting point, then customize extensively with the style prompt. Extract content and business logic from originals, design fresh components that match the product's visual personality.
-6. **Effect enhancement**: Use MagicUI, Reactbits, or similar for key touchpoints — CTA buttons, hero sections, feature highlights. Install to `src/components/magicui/` or `src/components/effects/`.
+5. **Evaluate existing presentational components** against quality criteria in `layout-governance.md`:
+   - Sidebar: has collapse? groups? active state? consistent icons? responsive?
+   - Data tables: sort? dropdown row actions? empty/loading states? status badges? pagination?
+   - Forms: visible labels? grouped sections? inline validation? sticky submit?
+   - App shell: shared layout? consistent across pages? no nested scroll fights?
+   - Components that fail criteria → redesign freely based on style prompt, using the matched block's component patterns as reference.
+6. **Functional components**: Replace raw HTML modals, custom dropdowns, manual selects with Design Anchor functional primitives (`dialog`, `command`, `select`, `popover`, `tabs`). These provide focus trap, keyboard nav, and ARIA roles.
+7. **Effect enhancement**: Use MagicUI, Reactbits, or similar for micro-interactions and state transitions on Functional pages. Hero animations and showcase effects only on Showcase pages.
 
 **Present the restructuring plan** before writing code:
-   - Current layout → proposed layout block.
+   - Page nature: Functional or Showcase.
+   - Matched block source (e.g., "shadcn/ui dashboard block as scaffold").
+   - Current layout → proposed layout based on the matched block.
+   - Presentational components failing quality criteria → what will be redesigned and how.
    - Functional components to install from Design Anchor (dialog, command, etc.).
-   - Presentational components to freely redesign (with style prompt direction).
-   - Key touchpoints for effect enhancement.
    - AI patterns to address (if any).
    - What stays: business logic, data bindings, API calls, state management.
-   - What changes: layout structure, visual design, section ordering, icon library.
+   - What changes: layout structure, component quality, visual design, section ordering, icon library.
 
 7. **Wait for per-page confirmation.** The user confirms each page before restructuring begins.
 8. **Execute Phase 1 + Phase 2.** Rebuild the layout. Install functional primitives from Design Anchor. Freely design all presentational components. Add effect enhancements. Unify icons. Reorder sections by information priority.

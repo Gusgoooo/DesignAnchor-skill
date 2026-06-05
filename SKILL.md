@@ -302,7 +302,9 @@ Determine the page's spatial structure before touching any component or color. T
    **Critical rule: a Functional page must NEVER be styled as a Showcase page.** No hero sections on a dashboard. No feature cards on a settings page. No CTA blocks on a chat interface. No marketing-style copy on a monitoring console. The style prompt shapes how the tool looks — it does not turn the tool into a brochure.
 
 2. **Identify page purpose.** Read `references/product-context.md` to classify: consumption, collection management, single record focus, creation/editing, configuration, conversation, canvas, or workflow orchestration.
-3. **Select a layout block.** A layout block is a compositional pattern — the high-level spatial arrangement of sections on the page. Common blocks:
+3. **Select a layout block and match an open-source block as the structural scaffold.**
+
+   First, identify the layout block type:
 
    | Block | Structure | When to Use |
    |---|---|---|
@@ -315,40 +317,34 @@ Determine the page's spatial structure before touching any component or color. T
    | **Canvas** | toolbar (top/side) → workspace (center, maximized) → properties panel (collapsible right) | Editor, builder, whiteboard, design tool |
    | **Split** | master list (left) → detail panel (right) | Email, file manager, two-pane navigation |
 
-   Blocks are starting points, not mandatory templates. Modify freely based on the page's actual needs, then verify against layout quality principles.
+   Then, **immediately look for a matching open-source block** to use as the page's structural scaffold:
+
+   | Scenario | Go-to Source | What You Get |
+   |---|---|---|
+   | Dashboard, sidebar, settings, auth | **shadcn/ui blocks** | Production-quality page layouts with responsive sidebar, data tables, charts |
+   | Admin CRUD, complete admin app | **shadcn-admin** | 10+ complete pages: dashboard, CRUD list, settings, auth, with sidebar and search |
+   | Extended patterns, login variants | **Kibo UI** | 28+ blocks + 1,100 patterns |
+   | Landing, hero, pricing, CTA | **Launch UI** | Landing page sections (Showcase pages only) |
+   | E-commerce pages | **Commerce UI** | Product, cart, checkout blocks |
+
+   **This is not optional inspiration — it is the default workflow.** When a matching block exists, use it as the page structure. The block gives you a production-quality skeleton (layout, spacing, responsive breakpoints, component arrangement) that would take significant effort to recreate from scratch. Then customize all visual elements with the style prompt in Phase 3.
+
+   Only design from scratch when no existing block matches the page's specific requirements. Even then, combine patterns from multiple blocks rather than starting from zero.
+
+   Modify blocks freely — add sections, remove sections, rearrange — based on the page's actual needs. The block is a structural starting point, not a rigid template.
 
 4. **Define section ordering** by user workflow priority — not by data model structure.
 5. **Set density** to match the task: dense for monitoring, balanced for CRUD, focused for content, minimal for creative work.
 
-Output of Phase 1: a spatial wireframe — section names, positions, and relative sizes. No components, no colors.
+Output of Phase 1: a spatial wireframe based on a matched block — section names, positions, and relative sizes. No colors yet, but the structural skeleton is production-quality.
 
 ### Phase 2: Component Composition (组件填充)
 
 Fill each layout slot with the right component. This phase answers: what renders in each section.
 
-**Component freedom principle:** AI freely designs and writes all presentational components — cards, sections, headers, stat blocks, navigation appearance, data displays, layouts. No mandatory component library for visual/presentational elements. Use the style prompt and your own design judgment to create the best-looking UI for each specific product.
+**Component freedom principle:** AI freely designs and writes all presentational components — cards, sections, headers, stat blocks, navigation appearance, data displays, layouts. No mandatory component library for visual/presentational elements. But "freely designed" does not mean "anything goes" — each presentational component has quality criteria (see `layout-governance.md`). When a component fails its criteria, redesign it.
 
-**Open-source blocks — preferred structural starting point:**
-
-When a page type matches an available block, prefer using it as the structural scaffold before designing from scratch. Blocks provide production-quality layout, spacing, and responsive behavior as a foundation. After adopting a block's structure, customize all visual elements extensively based on the style prompt — the block is a scaffold, not a finished design.
-
-Priority order by page type:
-
-| Page Type | Preferred Source | What It Provides |
-|---|---|---|
-| Dashboard, sidebar, settings, auth | **shadcn/ui blocks** (ui.shadcn.com/blocks) | The baseline — highest quality, most broadly applicable |
-| Admin CRUD, data tables, complete admin app | **shadcn-admin** (github: satnaing/shadcn-admin) | 10+ complete admin pages with sidebar, search, auth |
-| Extended patterns, login, dashboard variants | **Kibo UI** (kibo-ui.com) | 28+ blocks + 1,100 patterns, shadcn-based |
-| CLI-installable page blocks | **blocks.so** (github: ephraimduncan/blocks) | Login, sidebar, dialog blocks via shadcn CLI registry |
-| Landing, hero, pricing, CTA, FAQ, testimonials | **Launch UI** (launchuicomponents.com) | Most complete free landing page sections |
-| E-commerce pages, product, cart, checkout | **Commerce UI** (github: stackzero-labs/ui) | E-commerce-specific blocks |
-| Marketing sections | **TWBlocks** (github: tommyjepsen/twblocks) | 30+ marketing sections with dark/light mode |
-
-Rules:
-- This is a "prefer when appropriate" list — not every page needs a block. When no block matches, design freely from scratch.
-- AI has full freedom to modify, combine, or skip blocks based on the page's actual requirements.
-- Always customize extensively with the style prompt after adopting a block's structure. A block used as-is defeats the purpose of having a style prompt.
-- All blocks must still pass token constraint (structural colors → token CSS variables) and style prompt visual application.
+**Block-first composition:** The page structure comes from Phase 1's matched block. Phase 2 fills each slot in that structure with components — evaluating existing components against quality criteria, redesigning those that fail, and adding missing components for state completeness (empty, loading, error states).
 
 **Functional components — use Design Anchor:**
 - Dialog, AlertDialog, Command palette, Select, Dropdown, Popover, Sheet, Tooltip → `npx design-anchor add <component>`.

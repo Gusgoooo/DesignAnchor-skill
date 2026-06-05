@@ -132,12 +132,45 @@ For each page or major route:
 - Flag decorative icons that add no recognition value.
 - Recommend consolidation to a single library (default: `lucide-react`).
 
-### Token Audit
+### Token and Color Consistency Audit
 
-- Hardcoded colors, arbitrary Tailwind values, scattered CSS variables.
+This is one of the highest-value audits. Most existing products have color drift — the same semantic concept expressed as 5 different hardcoded values across components.
+
+**Hardcoded color scan:**
+- Flag every hex/rgb/hsl value and arbitrary Tailwind color class (`bg-blue-500`, `text-gray-600`, `border-slate-200`) in component files.
+- Each one must be mapped to a semantic token or removed.
+
+**Primary color alignment:**
+- Verify that ALL primary interactive elements (buttons, links, active nav items, selected states, toggles, checkboxes, progress bars, focus rings) use the same `primary` token.
+- Flag pages where primary buttons use different colors from each other or from the rest of the product.
+
+**Interactive state consistency:**
+- Verify that hover, focus, active, and disabled states are derived from semantic tokens, not independently defined.
+- Flag patterns like `bg-indigo-500 hover:bg-blue-600` (base and hover are unrelated colors).
+- All interactive components must use the same state derivation pattern across the product.
+
+**Surface hierarchy check:**
+- Verify that background surfaces use semantic tokens (`bg-background`, `bg-card`, `bg-popover`) and form a clear visual hierarchy.
+- Flag arbitrary background colors (`bg-gray-50`, `bg-slate-100`) that should be tokenized.
+- Verify sidebar, header, and content area backgrounds are consistent across pages.
+
+**Border color consistency:**
+- Count distinct border color values across all components.
+- Flag projects using 3+ different gray values for borders — these must be unified to `border-border` and `border-input` tokens.
+
+**Text color tiers:**
+- Verify that text colors map to semantic tiers: `text-foreground` (primary), `text-muted-foreground` (secondary), disabled.
+- Flag ad-hoc text colors (`text-gray-500`, `text-slate-400`, `text-zinc-600`) that should use a tier token.
+
+**Status color discipline:**
+- Verify that success/warning/error/info each use tokenized variants for background, text, and border.
+- Flag mixed shades within a category (e.g., `text-red-500` + `bg-rose-100` + `border-red-300` instead of unified destructive tokens).
+
+**Token naming and coverage:**
 - Token naming conflicts with Design Anchor conventions.
-- Missing semantic token usage.
-- WCAG AA contrast violations.
+- Missing semantic token coverage — identify UI concepts that have no token.
+- WCAG AA contrast violations on all token pairs.
+- Dark mode parity — every token must have a dark mode value.
 
 ### Navigation Audit
 
@@ -195,7 +228,7 @@ When the user chooses progressive optimization instead of layout restructuring:
 
 This path fixes token compliance and component quality without changing page-level layout or information architecture.
 
-- Replace hardcoded colors with semantic tokens.
+- Replace hardcoded colors with semantic tokens. Align all primary interactive elements to the same `primary` token. Unify hover/focus/active state derivation across all components. Establish consistent surface hierarchy, border colors, and text color tiers.
 - Replace raw HTML primitives with governed components.
 - **Replace substandard components that violate Component Quality Standards** — even in progressive mode, a sidebar with no collapse, a table with icon soup, or a form with no validation should be replaced. The page layout stays the same but the components inside it get upgraded.
 - Remove AI slop patterns (absolute bans) within existing components.
@@ -215,7 +248,7 @@ Scan and report everything listed in the audit scope above. Produce a structured
 1. **Summary**: overall governance score and top 3 issues.
 2. **Per-page analysis**: for each major page/route, report layout quality, component quality (with specific standard violations), icon consistency, and AI slop violations.
 3. **Component replacement plan**: list every substandard component, what standard it violates, and what it should be replaced with.
-4. **Token and color audit**: hardcoded values, contrast violations.
+4. **Token and color consistency audit**: hardcoded values, primary color misalignment across pages, inconsistent hover/focus states, surface hierarchy gaps, border color fragmentation, text tier violations, status color mixing, contrast violations, dark mode parity.
 5. **Recommended action**: whether layout restructuring or progressive optimization is more appropriate, and why.
 
 No files should be edited in read-only audit.

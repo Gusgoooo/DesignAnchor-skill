@@ -73,11 +73,52 @@ If your output matches a second-order default, redesign. The goal is to serve th
 
 ### Color
 
+**Contrast and encoding:**
 - All text must meet WCAG 2.1 AA contrast ratio (4.5:1 for normal text, 3:1 for large text). No exceptions.
 - Never use gray text lighter than `text-muted-foreground` token. If a token does not exist, create one that passes contrast.
-- Do not hardcode hex colors. Use semantic token classes (`bg-primary`, `text-foreground`, `border-border`).
+- Color must not be the only way to convey information. Pair color with icons, text, or patterns.
+
+**No hardcoded colors:**
+- Do not hardcode hex/rgb/hsl values. Use semantic token classes (`bg-primary`, `text-foreground`, `border-border`).
+- Do not use arbitrary Tailwind color values (`bg-blue-500`, `text-gray-600`, `border-slate-200`). Use token-mapped classes.
+- Every color in the codebase must trace back to a semantic token. If a component uses a color that has no token, create the token or replace the color.
+
+**Primary color consistency:**
+- All primary interactive elements use the same primary token: buttons, links, active navigation, selected items, toggles, checkboxes, radio buttons, progress bars, focus rings.
+- A product must have exactly one primary color across all pages. If page A has blue primary buttons and page B has purple primary buttons, this is a governance failure.
+- Secondary/accent colors are permitted but must also be tokenized and used consistently. Do not invent per-component accent colors.
+
+**Interactive state tokens:**
+- Hover, focus, active, and disabled states must be derived from semantic tokens, not independently hardcoded.
+- Wrong: `bg-indigo-500 hover:bg-blue-600` — two unrelated colors for base and hover.
+- Right: `bg-primary hover:bg-primary/90` — hover derived from the same token.
+- All interactive components must use the same state derivation pattern. If buttons use `hover:bg-primary/90`, links and nav items must use the same hover pattern, not a different opacity or a completely different color.
+- Disabled states use a consistent opacity or muted token, not per-component gray values.
+
+**Surface hierarchy:**
+- Background surfaces form a clear visual hierarchy using semantic tokens: page background (`bg-background`) → card/container (`bg-card`) → popover/dialog (`bg-popover`) → tooltip.
+- Each level must use its semantic token. No arbitrary `bg-gray-50`, `bg-slate-100`, or `bg-zinc-900` scattered across components.
+- Sidebar, header, and content area backgrounds must be intentional and consistent — not three random grays that happen to be close.
+
+**Border consistency:**
+- One border color token for standard borders (`border-border`), one for input borders (`border-input`), one for focus rings (`ring-ring`).
+- Not five different gray values across components. If a card uses `border-gray-200`, a table uses `border-slate-300`, and a dialog uses `border-neutral-200`, this is a governance failure — all must use `border-border`.
+
+**Text color tiers:**
+- Three tiers only: primary text (`text-foreground`), secondary/muted text (`text-muted-foreground`), disabled text.
+- Labels, headings, and body text use `text-foreground`. Descriptions, timestamps, and supplementary info use `text-muted-foreground`.
+- Do not create ad-hoc text color variations (`text-gray-500` here, `text-slate-400` there, `text-zinc-600` elsewhere). Map them all to the appropriate tier token.
+
+**Status color discipline:**
+- Four semantic status categories: success (green), warning (amber/yellow), error/destructive (red), info (blue).
+- Each category has tokenized variants for background, text, and border: `bg-destructive`, `text-destructive`, `border-destructive`.
+- Do not mix shades within a category. Wrong: `text-red-500` for error text but `bg-rose-100` for error background and `border-red-300` for error border — these should all be semantic tokens from the same destructive palette.
+- Do not invent new status color categories. If you need a "pending" or "draft" state, use `muted` tokens or an existing category with a label, not a new color.
+
+**Dark mode:**
 - Dark mode is not "invert all colors." Dark surfaces need adjusted contrast ratios, reduced saturation, and elevated surface layers.
-- Status colors are semantic: success (green), warning (amber/yellow), error (red), info (blue). Do not invent new color categories.
+- Every semantic token must have a dark mode value. No components that break in dark mode because they used a hardcoded light-theme color.
+- Test all surface hierarchy levels in dark mode — the visual distinction between background layers must remain clear.
 
 ### Typography
 
@@ -102,7 +143,6 @@ If your output matches a second-order default, redesign. The goal is to serve th
 - Interactive elements must be keyboard-reachable (tab order) and operable (enter/space).
 - Focus indicators must be visible. Do not remove the default focus ring without providing a custom one.
 - `prefers-reduced-motion` must be respected — skip or simplify animations when the user requests it.
-- Color must not be the only way to convey information. Pair color with icons, text, or patterns.
 
 ### Production Quality Bar
 
@@ -113,11 +153,13 @@ Every UI output must meet this minimum bar before delivery. If any item fails, f
 3. Empty state, loading state, and error state are handled — not blank areas or console errors.
 4. Layout does not break at common viewport widths (320px, 768px, 1024px, 1440px).
 5. No hardcoded colors — all colors use semantic tokens.
-6. No mixed icon libraries.
-7. All form fields have visible labels.
-8. Destructive actions are visually distinguished and gated.
-9. Keyboard navigation works for all interactive elements.
-10. Page renders without layout shift (no elements jumping after load).
+6. Primary color is consistent — all primary buttons, links, active states, and focus rings use the same `primary` token across every page.
+7. Interactive states (hover, focus, active, disabled) are token-derived and consistent across all components.
+8. No mixed icon libraries.
+9. All form fields have visible labels.
+10. Destructive actions are visually distinguished and gated.
+11. Keyboard navigation works for all interactive elements.
+12. Page renders without layout shift (no elements jumping after load).
 
 ## Activation Contract
 

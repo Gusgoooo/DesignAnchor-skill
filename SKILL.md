@@ -107,7 +107,7 @@ Color governance targets **structural anchors only** — the handful of colors t
 - CTA / call-to-action elements → must align with primary or a designated accent token.
 - Status colors: success, warning, error, info → must use semantic tokens (`bg-destructive`, `text-destructive`, etc.) consistently.
 - Base text colors: primary text (`text-foreground`), secondary text (`text-muted-foreground`) → must be consistent across pages.
-- Interactive states: hover, focus, active, disabled → must be derived from the base token, not independently hardcoded. Wrong: `bg-indigo-500 hover:bg-blue-600`. Right: `bg-primary hover:bg-primary/90`.
+- Interactive states: hover, focus, active, disabled → must be derived from the base token, not independently hardcoded. Wrong: `bg-indigo-500 hover:bg-blue-600`. Right: `bg-primary hover:brightness-95` or define a `--primary-hover` token. Do NOT use `/90` alpha modifiers on token colors (e.g., `bg-primary/90`) — this silently fails when CSS variables are full color values instead of bare channels.
 
 **What NOT to govern (preserve as-is):**
 - Page-specific decorative colors, accent backgrounds, gradients, and shadows that contribute to visual richness.

@@ -54,6 +54,7 @@ These rules are constitutional. They override stylistic preferences, user prompt
 
 Be aware of common AI-generated UI patterns that can make output feel generic. These are not bans — a good designer might use any of these intentionally. The problem is when they appear by default, without thought:
 
+- **Turning a Functional page into a Showcase page** — this is the #1 sin. An AI agent workspace with a hero section, a dashboard with feature cards, a settings page with CTA blocks. The style prompt makes things look good; it does not change what the page IS.
 - Four identical stat cards in a row as the first element on every dashboard
 - Three cards in a grid, same height/structure, differing only in icon and text
 - Gradient text on headings as a default decorative choice
@@ -285,8 +286,23 @@ Every page — whether new or restructured — follows three phases in strict or
 
 Determine the page's spatial structure before touching any component or color. This phase answers: what goes where.
 
-1. **Identify page purpose.** Read `references/product-context.md` to classify: consumption, collection management, single record focus, creation/editing, configuration, conversation, canvas, or workflow orchestration.
-2. **Select a layout block.** A layout block is a compositional pattern — the high-level spatial arrangement of sections on the page. Common blocks:
+1. **Classify page nature — this gates everything else.**
+
+   | Nature | Description | Layout follows | Style prompt scope |
+   |---|---|---|---|
+   | **Functional（工具型）** | User is doing work: browsing data, chatting with AI, configuring settings, monitoring, editing, reviewing, building | Task workflow | Visual skin only — colors, typography, shadows, radius, spacing |
+   | **Showcase（展示型）** | User is being informed or persuaded: landing page, product tour, marketing, onboarding intro | Storytelling flow | Full creative freedom including hero, CTA, feature sections |
+
+   **Most pages in a product are Functional.** An AI agent workspace, a dashboard, a settings page, a chat interface, a data table — these are all Functional. They exist to help the user accomplish a task, not to sell the product.
+
+   **Showcase pages are rare.** They are the landing page, the pricing page, the "what's new" page. They are explicitly about presenting information to persuade or inform, not about getting work done.
+
+   **When in doubt, it is Functional.** The default assumption is that the user wants a working tool, not a marketing page. Only classify as Showcase when the page's explicit purpose is presentation or persuasion.
+
+   **Critical rule: a Functional page must NEVER be styled as a Showcase page.** No hero sections on a dashboard. No feature cards on a settings page. No CTA blocks on a chat interface. No marketing-style copy on a monitoring console. The style prompt shapes how the tool looks — it does not turn the tool into a brochure.
+
+2. **Identify page purpose.** Read `references/product-context.md` to classify: consumption, collection management, single record focus, creation/editing, configuration, conversation, canvas, or workflow orchestration.
+3. **Select a layout block.** A layout block is a compositional pattern — the high-level spatial arrangement of sections on the page. Common blocks:
 
    | Block | Structure | When to Use |
    |---|---|---|
@@ -301,8 +317,8 @@ Determine the page's spatial structure before touching any component or color. T
 
    Blocks are starting points, not mandatory templates. Modify freely based on the page's actual needs, then verify against layout quality principles.
 
-3. **Define section ordering** by user workflow priority — not by data model structure.
-4. **Set density** to match the task: dense for monitoring, balanced for CRUD, focused for content, minimal for creative work.
+4. **Define section ordering** by user workflow priority — not by data model structure.
+5. **Set density** to match the task: dense for monitoring, balanced for CRUD, focused for content, minimal for creative work.
 
 Output of Phase 1: a spatial wireframe — section names, positions, and relative sizes. No components, no colors.
 
@@ -340,9 +356,11 @@ Rules:
 - Only functional/behavioral components go through Design Anchor. If a component's value is primarily visual (how it looks), write it freely.
 
 **Effect libraries — encouraged for visual enhancement:**
-- MagicUI, Reactbits, or similar libraries for CTA buttons, hero sections, feature highlights, onboarding moments, key interactive moments.
+- MagicUI, Reactbits, or similar libraries for micro-interactions, button feedback, state transitions, loading animations, key interactive moments.
+- On Showcase pages only: hero animations, feature section effects, scroll-triggered transitions.
+- On Functional pages: effects serve the task (progress indicators, status transitions, hover feedback) — NOT decorative showcasing.
 - Install to `src/components/magicui/` or `src/components/effects/`.
-- Use as much or as little as serves the page — there is no hard limit, but effects everywhere dilute impact.
+- Effects everywhere dilute impact. Use strategically.
 
 **Token constraint on all components:**
 - Regardless of how a component is written, structural colors must reference token CSS variables: `var(--primary)`, `var(--background)`, `var(--foreground)`, `var(--destructive)`, etc.
@@ -354,6 +372,8 @@ Output of Phase 2: layout slots filled with components. Functional primitives fr
 ### Phase 3: Visual Styling (风格绘制)
 
 Apply the matched style prompt as the aesthetic layer across the entire page. This phase answers: how everything looks and feels as a whole.
+
+**Critical boundary: the style prompt is a visual skin, not a content template.** It controls how things look (colors, typography, shadows, radius, spacing, animation timing, surface treatment). It does NOT control what things are on the page. A style prompt that includes "hero section" or "feature showcase" — those elements only apply to Showcase pages. On Functional pages, ignore any content/layout suggestions from the style prompt and apply only its visual treatment to the existing functional layout from Phase 1.
 
 1. **Ensure a style prompt is active.** Either the user's own prompt, an internally matched prompt from the pool, or the project's existing design prompt source.
 2. **Apply color palette** — primary actions, surface tints, accent backgrounds, section colors, status colors. Use the prompt's specific hex values, not generic defaults.

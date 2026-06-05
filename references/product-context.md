@@ -66,10 +66,22 @@ These are common layout mistakes. When encountered during audit or restructuring
 | Full-width forms | Every field stretched to 100% width regardless of content | Match field width to expected content length |
 | Persistent banners | Welcome messages, announcements shown on every visit | Dismissible, or shown once |
 
+## Page Nature — Functional vs Showcase
+
+Before selecting layout, classify the page nature. This is the most important decision in the pipeline.
+
+**Functional（工具型）— 绝大多数页面属于这类。** The user is doing work: browsing data, chatting with AI, configuring settings, monitoring systems, editing content, reviewing items, building things. Layout serves the task. Style prompt applies as visual skin only (colors, typography, shadows, spacing) — it does NOT add hero sections, feature showcases, CTA blocks, or marketing copy to a functional page.
+
+**Showcase（展示型）— 极少数页面。** Landing page, pricing page, product tour, "what's new" page. The user is being informed or persuaded. Full creative freedom including hero, feature sections, CTA blocks.
+
+**When in doubt, it is Functional.** An AI agent workspace is Functional. A dashboard is Functional. A settings page is Functional. A chat interface is Functional. A data table page is Functional. Only pages whose explicit purpose is presentation or persuasion are Showcase.
+
+**Functional pages get their polish from:** thoughtful information architecture, meaningful data density, clear action hierarchy, professional typography, rich but appropriate color usage, and polished micro-interactions. NOT from hero sections, feature cards, or marketing-style layout.
+
 ## UI Judgment
 
 Build the working interface first, not a landing page. Prioritize scanability, task completion speed, clear state, and reversible operations.
 
-The first page should feel polished and purposeful. Make it impressive through information architecture, meaningful data, action clarity, state design, and spatial rhythm. Avoid heavy decoration by default.
+The first page should feel polished and purposeful. Make it impressive through information architecture, meaningful data, action clarity, state design, and spatial rhythm — not through decorative showcase sections.
 
 When restructuring an existing page, the goal is not to make it look different — it is to make the user's task easier. Every layout change should be traceable to a workflow improvement.

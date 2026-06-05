@@ -23,6 +23,7 @@ A comprehensive style prompt should cover:
 
 Do not let the style prompt override:
 
+- **Page nature** — a Functional page stays Functional. The style prompt makes a dashboard look beautiful; it does not turn the dashboard into a landing page. Hero sections, feature showcases, CTA blocks in a style prompt only apply to Showcase pages.
 - component interaction quality (accessibility, keyboard nav, state completeness),
 - semantic token structure (the naming convention and inheritance),
 - WCAG contrast requirements,
@@ -30,6 +31,8 @@ Do not let the style prompt override:
 - user-owned component boundaries,
 - screen type layout patterns from `layout-governance.md`,
 - information architecture decisions driven by workflow analysis.
+
+**The style prompt is a visual skin, not a content template.** It controls colors, typography, shadows, radius, spacing, animation, surface treatment. It does NOT control what sections exist on the page or what the page's purpose is.
 
 **But within those structural constraints, let the style prompt drive every visual decision.** The style prompt is what prevents the product from looking like a generic black-and-white skeleton.
 

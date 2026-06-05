@@ -106,9 +106,71 @@ Color governance targets **structural anchors only** — the handful of colors t
 - All text must meet WCAG 2.1 AA contrast ratio (4.5:1 for normal text, 3:1 for large text).
 - Color must not be the only way to convey information. Pair color with icons, text, or patterns.
 
-**Dark mode:**
-- Structural anchor tokens must have dark mode values.
-- Decorative colors that break in dark mode should be adjusted, but do not strip them — replace with dark-mode-appropriate equivalents that maintain the same visual richness.
+**Dark mode** — see the Dark Mode section above for full implementation spec. Key points:
+- Structural anchor tokens must have dark mode values defined in `tokens.json`.
+- Decorative colors that break in dark mode should be adjusted — replace with dark-mode-appropriate equivalents that maintain the same visual richness, not stripped.
+- After completing a page, proactively ask the user if they want dark mode enabled.
+
+### Responsive Design (自适应)
+
+Every page must work across common viewport widths. This is not optional polish — it is part of the initial build.
+
+**Breakpoints (Tailwind default):**
+
+| Breakpoint | Width | Typical Device |
+|---|---|---|
+| Base (mobile-first) | < 640px | Phone |
+| `sm` | ≥ 640px | Large phone / small tablet |
+| `md` | ≥ 768px | Tablet |
+| `lg` | ≥ 1024px | Laptop |
+| `xl` | ≥ 1280px | Desktop |
+| `2xl` | ≥ 1536px | Large desktop |
+
+**Layout adaptation rules:**
+
+- **Sidebar**: collapsed or hidden below `lg`. On mobile (`< md`), sidebar becomes a sheet/drawer overlay triggered by a hamburger button. Use Design Anchor `sheet` for the overlay.
+- **Multi-column grids**: collapse to single column below `md`. Two-column grids may persist at `sm` if content fits.
+- **Data tables**: horizontal scroll with sticky first column below `lg`. Optionally switch to card-based layout below `md`.
+- **Split views** (master-detail): stack vertically below `md`. Show list first, detail on tap/click.
+- **Forms**: single column below `sm`. Two-column short-field pairs (first name + last name) only above `sm`.
+- **Charts and visualizations**: simplify or stack below `md`. Never let charts overflow horizontally.
+- **Fixed/sticky elements**: header stays sticky. Sidebar collapse control always accessible. Submit buttons in sticky footer on mobile.
+- **Touch targets**: minimum 44×44px on mobile. Interactive elements have adequate spacing to prevent mis-taps.
+- **Typography**: body text stays within 55-75 character line width on large screens (`max-w-prose` or equivalent). On mobile, full-width with appropriate padding.
+
+**Implementation approach:**
+- Write mobile-first CSS. Base styles are for mobile; use `sm:`, `md:`, `lg:` to add complexity.
+- Test at 320px, 768px, 1024px, 1440px — these are the four checkpoints in the Production Quality Bar.
+- Use Tailwind responsive utilities, not custom media queries.
+- Container queries (`@container`) are acceptable for component-level responsiveness.
+
+### Dark Mode (暗色模式)
+
+**Proactive prompt:** After generating the first page or completing a governance pass, ask the user:
+
+`页面已完成。需要我顺便做一个暗色模式吗？会基于 token 系统实现，一套代码自动适配。`
+
+If the user confirms, implement dark mode using the token system:
+
+**Token-based dark mode implementation:**
+1. Define dark mode values for all structural tokens in `tokens.json`:
+   - `--background` → dark surface (e.g., `#0a0a0a` or `#121212`)
+   - `--foreground` → light text (e.g., `#fafafa`)
+   - `--primary` → same hue, adjusted brightness for dark backgrounds
+   - `--muted` / `--muted-foreground` → dark-appropriate muted values
+   - `--card` / `--popover` → slightly elevated dark surfaces
+   - `--border` → subtle dark borders (e.g., `#27272a`)
+   - `--destructive` / status colors → adjusted for dark background contrast
+2. Use CSS `prefers-color-scheme: dark` or a class-based toggle (`.dark`) depending on project setup.
+3. All structural colors already reference token CSS variables — dark mode swaps the variable values, not the code.
+4. **Decorative colors must also work in dark mode.** Light-mode-only decorative colors (pastel backgrounds, light gradients) need dark-mode equivalents that maintain the same visual richness — not stripped, but adapted.
+5. Verify WCAG AA contrast in both modes.
+6. Run `npx design-anchor sync` after updating dark mode tokens.
+
+**What NOT to do:**
+- Do not add `dark:` prefixes to every Tailwind class manually. Use token CSS variables so dark mode is automatic.
+- Do not make dark mode an afterthought with washed-out colors. Dark mode should look intentionally designed, not just inverted.
+- Do not break decorative elements — gradients, shadows, accent tints should have dark-mode-appropriate equivalents.
 
 ### Typography
 
@@ -142,7 +204,7 @@ Every UI output must meet this minimum bar before delivery. If any item fails, f
 2. All text passes WCAG AA contrast.
 3. Every interactive element has hover and focus states.
 4. Empty state, loading state, and error state are handled — not blank areas or console errors.
-5. Layout does not break at common viewport widths (320px, 768px, 1024px, 1440px).
+5. **Responsive** — layout adapts correctly at 320px, 768px, 1024px, 1440px. Sidebar collapses below `lg`, tables adapt below `md`, grids stack on mobile, touch targets ≥ 44px.
 6. **Token compliance** — structural anchor colors (primary, CTA, status, base text) reference token CSS variables consistently across pages. Decorative colors are free.
 7. Primary color is consistent — all primary buttons, links, active states, and focus rings use the same `primary` token across every page.
 8. Interactive states (hover, focus, active, disabled) are token-derived and consistent.
@@ -500,13 +562,21 @@ Design Anchor 布局治理：已根据页面用途重构布局。
 Every response that changes UI must end with a `Design Anchor 自检` line covering:
 
 - Visual quality (page looks polished, colorful, and appealing — has visible design personality)
-- Layout quality (purpose-layout fit, information hierarchy)
+- Layout quality (purpose-layout fit, information hierarchy, page nature correct)
+- Responsive (tested at 320px / 768px / 1024px / 1440px, sidebar collapses, tables adapt, touch targets adequate)
 - Icon consistency (single library, uniform size)
 - Token compliance (structural anchor colors reference token CSS variables consistently)
+- Dark mode (if enabled: token values defined, decorative colors adapted, contrast verified)
 - Sync / audit status
 
 ```
-Design Anchor 自检：视觉 ✓ | 布局 ✓ | icon ✓ | token ✓ | sync ✓ audit ✓
+Design Anchor 自检：视觉 ✓ | 布局 ✓ | 响应式 ✓ | icon ✓ | token ✓ | 暗色 ✓/未启用 | sync ✓ audit ✓
+```
+
+After completing a page, also prompt:
+
+```
+页面已完成。需要我顺便做一个暗色模式吗？会基于 token 系统实现，一套代码自动适配。
 ```
 
 ## References

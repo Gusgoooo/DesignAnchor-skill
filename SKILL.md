@@ -12,7 +12,7 @@ compatibility:
 
 # Design Anchor Skill
 
-Use this skill as the AI entry layer for Design Anchor. Its first job is to classify the situation: create a polished first page for new or incomplete products, extract tokens from detailed design prompts, or offer layout restructuring as the default governance mode for mature existing products. Its second job is to make the work governable through Design Anchor tokens, components, layout principles, specs, rules, sync, MCP, and audit. This applies to all product types: B2B platforms, SaaS tools, AI products, creative tools, developer tools, and any interface where users do real work.
+Use this skill as the AI entry layer for Design Anchor. Its first job is to classify the situation: create a polished first page for new or incomplete products, extract tokens from detailed design prompts, or offer layout restructuring as the default governance mode for mature existing products. Its second job is to make the work visually consistent through the Design Anchor **token system** — the single structural constraint that ensures color, typography, and spacing coherence across pages, while leaving all component design and visual creativity completely free. This applies to all product types: SaaS tools, AI products, creative tools, developer tools, consumer apps, and any interface where users do real work.
 
 The npm package is the actual runtime: it creates project tokens, writes generated AI rules, manages the local `.anchor` control plane, exposes MCP, installs source components on demand, and runs sync/audit.
 
@@ -38,11 +38,10 @@ Keep the current Design Anchor boundaries clear:
 
 - `design-anchor` is installed as a project dev dependency and called by AI tools or scripts.
 - `.anchor/` is a local, gitignored, rebuildable control plane. Do not import runtime UI from it.
-- User-owned component source lives in `src/components/anchor-ui/` and is committed.
-- Components are added only when needed with `npx design-anchor add <component>`.
-- Business code imports from `@design` or `@/components/anchor-ui`.
-- Design tokens live in `src/design-tokens/tokens.json`; generated CSS lives in `src/styles/design-tokens.generated.css`.
-- User-written components may appear in the component library even if their spec is absent or empty.
+- **Token system is the structural constraint.** Design tokens live in `src/design-tokens/tokens.json`; generated CSS lives in `src/styles/design-tokens.generated.css`. All structural colors must reference token CSS variables.
+- **Functional components** (dialog, command, select, popover, etc.) are installed on demand with `npx design-anchor add <component>` and imported from `@design` or `@/components/anchor-ui/`. These provide accessibility and interaction behavior.
+- **Presentational components** (cards, sections, layouts, navigation appearance, data displays, etc.) are freely designed by AI. No mandatory library. Style prompt drives the visual direction.
+- User-written components live in `src/components/` and are committed.
 - Internal style prompts may be used to bootstrap a polished first page when the user's input is incomplete.
 - Internal prompt matching is not a visible preset board or product section.
 - There is no mandatory Portal reveal.
@@ -51,32 +50,22 @@ Keep the current Design Anchor boundaries clear:
 
 These rules are constitutional. They override stylistic preferences, user prompts, and internal style matching. Every UI output must pass these checks before delivery.
 
-### Absolute Bans
+### AI Pattern Awareness
 
-Never produce these patterns. They are the saturated defaults of AI-generated UI in 2025-2026 — they signal "this was made by AI" to any experienced designer or user. If you find them in existing code during governance, remove them.
+Be aware of common AI-generated UI patterns that can make output feel generic. These are not bans — a good designer might use any of these intentionally. The problem is when they appear by default, without thought:
 
-1. **Hero metrics grid at page top.** Four identical stat cards with icon + number + label in a 4-column grid as the first thing on a dashboard. This is the single most common AI layout cliché. If the page needs KPIs, vary the card sizes, combine with inline trends, or integrate into the page header.
-2. **Identical card grid.** Three or four cards in a row, same height, same structure, same padding, differing only in icon and text. If content is truly parallel, vary the presentation — mix card sizes, use a table, or combine into a richer composite.
-3. **Gradient text on headings.** `bg-clip-text text-transparent bg-gradient-to-r` on page titles or section headings.
-4. **Decorative glassmorphism.** `backdrop-blur` and semi-transparent backgrounds used as surface treatment without functional purpose (e.g., a frosted sidebar for aesthetics).
-5. **Side accent stripes.** Colored left borders on cards or sections used purely as decoration with no semantic meaning.
-6. **Marketing hero on a workbench.** Large hero sections with illustrations, taglines, or "Welcome back" messages on pages the user visits 50+ times a day.
-7. **Rainbow status colors.** Using 5+ distinct hues for status badges on the same page. Limit to 3-4 semantic colors (success, warning, error, info) and use intensity/shade to distinguish within a category.
-8. **Excessive rounded corners.** `rounded-2xl` or `rounded-3xl` on data-dense components like tables, sidebars, or forms. Use the project's border-radius token consistently — usually `rounded-md` or `rounded-lg` for containers.
-9. **Empty decorative icons.** An icon on every section heading, every label, every card title — where the icon adds no recognition value and is just visual noise.
-10. **Full-width everything.** Every element stretched to 100% width regardless of content — forms where a date picker is as wide as a textarea, inputs that span 1200px.
+- Four identical stat cards in a row as the first element on every dashboard
+- Three cards in a grid, same height/structure, differing only in icon and text
+- Gradient text on headings as a default decorative choice
+- `backdrop-blur` glassmorphism used everywhere without purpose
+- Colored left borders on every card as generic decoration
+- "Welcome back" hero sections on frequently-visited workbench pages
+- 5+ different hues for status badges on a single page
+- `rounded-2xl` or `rounded-3xl` on data-dense components
+- An icon on every heading/label/title where it adds no recognition value
+- Every element stretched to 100% width regardless of content
 
-### Second-Order Slop Test
-
-After producing UI, run this meta-check: the first generation of AI defaults (hero metrics, gradient text, glassmorphism) is now well-known. Avoiding them has created second-order defaults — predictable "anti-AI" patterns that are equally clichéd:
-
-- Replacing card grids with bento grids (asymmetric cards that still contain the same shallow content).
-- Replacing gradient text with animated gradient borders.
-- Replacing stat cards with oversized single-number displays.
-- Replacing sidebar navigation with a floating command palette as the only navigation.
-- Using extreme minimalism (nearly invisible borders, 2px text, ghost buttons everywhere) as a reaction against "AI-looking" UI.
-
-If your output matches a second-order default, redesign. The goal is to serve the user's task, not to look anti-AI.
+**The test is intent.** If a pattern serves the page's purpose and the user's task, use it. If it's there because it's the first thing that comes to mind, find a better solution. Design for the specific product, not for a generic "modern dashboard."
 
 ### Visual Quality Priority
 
@@ -84,11 +73,11 @@ Token governance exists to enforce structural consistency — not to strip visua
 
 **Style prompt drives beauty.** The style prompt (user-provided or internally matched) defines the product's visual soul: color palette richness, gradient usage, shadow depth, surface treatment, accent tones, illustration style. Token governance then locks the structural anchors (primary, CTA, status) so they stay consistent across pages — but it does NOT replace every color in the codebase with a token reference.
 
-**Components provide structure, not aesthetics.** Design Anchor components ensure interaction quality (accessibility, keyboard nav, state completeness). The visual beauty of pages — color richness, spacing rhythm, typographic feel, surface depth — comes from the style prompt and developer's intentional design choices. Do not over-rely on components to make pages look good. A page with perfect component governance but no visual personality is a governance failure.
+**Functional components provide behavior, not aesthetics.** Design Anchor's functional components (dialog, command, select, etc.) ensure interaction quality (accessibility, keyboard nav, focus management). All visual beauty — color richness, spacing rhythm, typographic feel, surface depth, component appearance — comes from the style prompt and AI's design creativity. Do not expect any component library to make pages beautiful. Beauty comes from design, not from library defaults.
 
 **Design personality is mandatory.** Every product must have visible design personality from its style prompt: distinctive color palette, intentional typography pairing, specific shadow/depth treatment, and 2-3 signature elements that make it recognizable. If the generated page looks like a generic Tailwind/shadcn default, the style prompt was not applied deeply enough.
 
-A comprehensive style prompt covers: design philosophy, color strategy with specific hex values, typography system with font pairings, surface and depth approach, component visual styling specifications, effects and micro-interactions, signature bold elements, and style-specific anti-patterns. Thin prompts (just mood keywords) produce thin visuals. See `references/style-prompt-guidance.md` and `references/b2b-design-prompts/_template.md` for the full specification.
+A comprehensive style prompt covers: design philosophy, color strategy with specific hex values, typography system with font pairings, surface and depth approach, component visual styling specifications, effects and micro-interactions, signature bold elements, and style-specific anti-patterns. Thin prompts (just mood keywords) produce thin visuals. See `references/style-prompt-guidance.md` and `references/design-prompts/_template.md` for the full specification.
 
 **Balance rule:** After any governance action, the page should look at least as visually appealing as before. If governance made it look worse (plainer, less colorful, more generic), undo the visual regression and preserve the original aesthetic choices while only fixing the structural anchors.
 
@@ -148,14 +137,14 @@ Color governance targets **structural anchors only** — the handful of colors t
 
 Every UI output must meet this minimum bar before delivery. If any item fails, fix it before reporting the task as complete.
 
-1. **Visual polish** — the page looks polished, colorful, and appealing. Not a wireframe, not black-and-white, not a plain skeleton. If governance stripped visual richness, restore it.
+1. **Visual polish** — the page looks polished, colorful, and appealing. Not a wireframe, not black-and-white, not a plain skeleton. The page has visible design personality from the style prompt.
 2. All text passes WCAG AA contrast.
 3. Every interactive element has hover and focus states.
 4. Empty state, loading state, and error state are handled — not blank areas or console errors.
 5. Layout does not break at common viewport widths (320px, 768px, 1024px, 1440px).
-6. Structural anchor colors (primary, CTA, status) use semantic tokens consistently. Other decorative colors are preserved.
+6. **Token compliance** — structural anchor colors (primary, CTA, status, base text) reference token CSS variables consistently across pages. Decorative colors are free.
 7. Primary color is consistent — all primary buttons, links, active states, and focus rings use the same `primary` token across every page.
-8. Interactive states (hover, focus, active, disabled) are token-derived and consistent across all components.
+8. Interactive states (hover, focus, active, disabled) are token-derived and consistent.
 9. No mixed icon libraries.
 10. All form fields have visible labels.
 11. Destructive actions are visually distinguished and gated.
@@ -230,12 +219,12 @@ Use this when the project appears complete or already has substantial product UI
 Before any file changes:
 
 1. Run read-only inspection including layout analysis, icon audit, and information architecture assessment.
-2. **Match a style prompt for beautification.** Even for existing products, select an appropriate prompt from the prompt pool (via `scripts/list-style-prompts.mjs` or scanning `references/b2b-design-prompts/*.md`) based on the product's type, tone, and density. If the user has provided style direction, use that instead. If a design prompt source already exists in the project (`.anchor/design-prompt-source.md` or `design-prompt.md`), reuse it. This prompt drives the page-level beautification phase after structural governance.
+2. **Match a style prompt for beautification.** Even for existing products, select an appropriate prompt from the prompt pool (via `scripts/list-style-prompts.mjs` or scanning `references/design-prompts/*.md`) based on the product's type, tone, and density. If the user has provided style direction, use that instead. If a design prompt source already exists in the project (`.anchor/design-prompt-source.md` or `design-prompt.md`), reuse it. This prompt drives the page-level beautification phase after structural governance.
 3. Present the situation with confidence: the product will benefit from layout restructuring, not just token fixes.
 4. Recommend a new git branch.
 5. Offer exactly these choices:
-   - `布局重构`（推荐）: read each page, classify screen type, restructure layout, replace components, unify icons, reorder information architecture, **then apply page-level beautification from matched style prompt**. Preserves all business logic and data bindings.
-   - `渐进优化`: only fix token compliance, import paths, and raw primitive replacement. Keeps existing layout unchanged. **Still applies style prompt beautification to replaced components.**
+   - `布局重构`（推荐）: read each page, extract content and business logic, completely redesign layout and visual presentation using style prompt. Only functional components (dialog, command, etc.) from Design Anchor; all presentational components freely designed. Token system constrains structural colors.
+   - `渐进优化`: only fix token compliance for structural anchor colors. Keeps existing layout and components unchanged.
    - `只读审计`: scan and report only; no file changes.
 6. Wait for the user to confirm. Do not treat silence, vague approval, or a different feature request as consent.
 
@@ -261,13 +250,13 @@ Use this when the user gives a vague product need, such as `做一个 CRM 后台
 
 1. Infer roles, objects, workflows, page type, and density from the request.
 2. Use heuristic Q&A only if the missing answer would change the style or workflow.
-3. List available prompt files with `scripts/list-style-prompts.mjs` or by scanning `references/b2b-design-prompts/*.md`.
+3. List available prompt files with `scripts/list-style-prompts.mjs` or by scanning `references/design-prompts/*.md`.
 4. Select the best internal prompt using each file's frontmatter scenario metadata.
-5. Load only the selected file under `references/b2b-design-prompts/`.
+5. Load only the selected file under `references/design-prompts/`.
 6. Do not reveal the preset name; tell the user you matched an appropriate direction.
 7. Save that prompt into a project-local markdown file, such as `.anchor/design-prompt-source.md`.
 8. Run `npx design-anchor theme <prompt-file.md>`.
-9. Generate the first polished page using extracted tokens, product context, `@design` components, and on-demand components.
+9. Generate the first polished page using extracted tokens, product context, and the Page Rendering Pipeline (layout → components → styling).
 10. Run `npx design-anchor sync`; run `npx design-anchor audit` when UI changed.
 
 ### First Product Page
@@ -277,12 +266,12 @@ Use this when the user asks for any product interface: admin system, dashboard, 
 **Follow the Page Rendering Pipeline (three phases in order):**
 
 1. **Phase 1 — Layout Blueprint:** Infer roles, objects, workflows, page purpose, and density. Select the appropriate layout block. Read `references/layout-governance.md` and apply layout quality principles. Define the spatial structure.
-2. **Phase 2 — Component Composition:** Fill layout slots with Design Anchor components. Identify 2-3 key touchpoints (CTA, hero, feature highlight) and enhance with effect libraries (MagicUI, Reactbits) where appropriate.
+2. **Phase 2 — Component Composition:** Freely design presentational components for each layout slot. Use Design Anchor only for functional primitives (dialog, command, select, etc.). Enhance key moments with effect libraries (MagicUI, Reactbits). All structural colors reference token CSS variables.
 3. **Phase 3 — Visual Styling:** Ensure a comprehensive style prompt is active (user-provided or internally matched). Apply the full visual personality: color palette, typography, shadow/depth, signature elements, decorative touches.
 
 The first page must feel impressive — not through decorative excess, but through visual personality, confident composition, effect-enhanced key moments, meaningful data, and polished states.
 
-Read `references/b2b-product-context.md` before creating product screens.
+Read `references/product-context.md` before creating product screens.
 
 ### Design System Inspection
 
@@ -296,7 +285,7 @@ Every page — whether new or restructured — follows three phases in strict or
 
 Determine the page's spatial structure before touching any component or color. This phase answers: what goes where.
 
-1. **Identify page purpose.** Read `references/b2b-product-context.md` to classify: consumption, collection management, single record focus, creation/editing, configuration, conversation, canvas, or workflow orchestration.
+1. **Identify page purpose.** Read `references/product-context.md` to classify: consumption, collection management, single record focus, creation/editing, configuration, conversation, canvas, or workflow orchestration.
 2. **Select a layout block.** A layout block is a compositional pattern — the high-level spatial arrangement of sections on the page. Common blocks:
 
    | Block | Structure | When to Use |
@@ -321,29 +310,46 @@ Output of Phase 1: a spatial wireframe — section names, positions, and relativ
 
 Fill each layout slot with the right component. This phase answers: what renders in each section.
 
-**Structural components — use Design Anchor:**
-- Sidebar, data table, form fields, dialog, tabs, command palette, app shell → `npx design-anchor add <component>`.
-- These provide interaction quality: accessibility, keyboard navigation, state completeness, ARIA roles.
+**Component freedom principle:** AI freely designs and writes all presentational components — cards, sections, headers, stat blocks, navigation appearance, data displays, layouts. No mandatory component library for visual/presentational elements. Use the style prompt and your own design judgment to create the best-looking UI for each specific product.
 
-**Key touchpoint effects — allow effect libraries:**
-- CTA buttons, hero sections, feature highlights, onboarding cards, premium interactive moments → may use effect libraries for visual enhancement:
-  - **MagicUI** (`@/components/magicui/`): animated borders, shimmer buttons, spotlight effects, animated gradients, text reveal.
-  - **Reactbits** or similar: animated hover effects, interactive cards, motion text, transition effects.
-- Effect libraries are **supplements on top of** Design Anchor components, not replacements. The CTA is still a Design Anchor button — MagicUI adds the shimmer.
-- **Limit: 2-3 key touchpoints per page.** Effects on every element dilute their impact and create visual noise.
-- Install effect components to `src/components/magicui/` or `src/components/effects/`, not scattered across the codebase.
+**Open-source blocks — preferred structural starting point:**
 
-**What gets effects vs what stays clean:**
+When a page type matches an available block, prefer using it as the structural scaffold before designing from scratch. Blocks provide production-quality layout, spacing, and responsive behavior as a foundation. After adopting a block's structure, customize all visual elements extensively based on the style prompt — the block is a scaffold, not a finished design.
 
-| Gets effects (2-3 per page) | Stays clean |
-|---|---|
-| Primary CTA button | Navigation / sidebar |
-| Hero section / page header | Data tables |
-| Feature highlight card | Forms / inputs |
-| Onboarding / empty state | Settings panels |
-| Key status indicator | Standard list items |
+Priority order by page type:
 
-Output of Phase 2: all layout slots filled with components. Key touchpoints identified and enhanced. Functional but not yet styled.
+| Page Type | Preferred Source | What It Provides |
+|---|---|---|
+| Dashboard, sidebar, settings, auth | **shadcn/ui blocks** (ui.shadcn.com/blocks) | The baseline — highest quality, most broadly applicable |
+| Admin CRUD, data tables, complete admin app | **shadcn-admin** (github: satnaing/shadcn-admin) | 10+ complete admin pages with sidebar, search, auth |
+| Extended patterns, login, dashboard variants | **Kibo UI** (kibo-ui.com) | 28+ blocks + 1,100 patterns, shadcn-based |
+| CLI-installable page blocks | **blocks.so** (github: ephraimduncan/blocks) | Login, sidebar, dialog blocks via shadcn CLI registry |
+| Landing, hero, pricing, CTA, FAQ, testimonials | **Launch UI** (launchuicomponents.com) | Most complete free landing page sections |
+| E-commerce pages, product, cart, checkout | **Commerce UI** (github: stackzero-labs/ui) | E-commerce-specific blocks |
+| Marketing sections | **TWBlocks** (github: tommyjepsen/twblocks) | 30+ marketing sections with dark/light mode |
+
+Rules:
+- This is a "prefer when appropriate" list — not every page needs a block. When no block matches, design freely from scratch.
+- AI has full freedom to modify, combine, or skip blocks based on the page's actual requirements.
+- Always customize extensively with the style prompt after adopting a block's structure. A block used as-is defeats the purpose of having a style prompt.
+- All blocks must still pass token constraint (structural colors → token CSS variables) and style prompt visual application.
+
+**Functional components — use Design Anchor:**
+- Dialog, AlertDialog, Command palette, Select, Dropdown, Popover, Sheet, Tooltip → `npx design-anchor add <component>`.
+- These are **interaction primitives** that require focus trap, keyboard navigation, ARIA roles, escape-to-close, overlay management, and other accessibility behavior that is hard to get right from scratch.
+- Only functional/behavioral components go through Design Anchor. If a component's value is primarily visual (how it looks), write it freely.
+
+**Effect libraries — encouraged for visual enhancement:**
+- MagicUI, Reactbits, or similar libraries for CTA buttons, hero sections, feature highlights, onboarding moments, key interactive moments.
+- Install to `src/components/magicui/` or `src/components/effects/`.
+- Use as much or as little as serves the page — there is no hard limit, but effects everywhere dilute impact.
+
+**Token constraint on all components:**
+- Regardless of how a component is written, structural colors must reference token CSS variables: `var(--primary)`, `var(--background)`, `var(--foreground)`, `var(--destructive)`, etc.
+- This ensures that primary buttons, links, active states, and status colors are consistent across the entire product — even though each page's components may look completely different.
+- Decorative colors, gradients, shadows, accents, and page-specific treatments are free — no token required.
+
+Output of Phase 2: layout slots filled with components. Functional primitives from Design Anchor, everything else freely designed. All structural colors reference tokens.
 
 ### Phase 3: Visual Styling (风格绘制)
 
@@ -367,65 +373,36 @@ Before writing UI, inspect `@design`, `src/components/anchor-ui`, project tokens
 
 ### Component Rules
 
-- Prefer imports from `@design`; otherwise use `@/components/anchor-ui`.
-- Do not import component implementations from `.anchor/` or `node_modules/design-anchor/`.
-- Add only needed components with `npx design-anchor add <component>`.
-- Use Design Anchor components for structural/interactive primitives: buttons, inputs, dialogs, tabs, selects, tables, cards, and menus.
-- Effect libraries (MagicUI, Reactbits, etc.) are allowed only for key touchpoint enhancement — CTA, hero, feature highlights. Install to `src/components/magicui/` or `src/components/effects/`. Never use effects as structural component replacements.
-- Use semantic token classes for structural anchors (primary, CTA, status, base text). Preserve intentional decorative colors.
-- Keep component implementation changes in `src/components/anchor-ui/`.
-- Components provide interaction quality (accessibility, keyboard nav, states). Visual personality comes from the style prompt and effect enhancements — do not expect bare components alone to make pages beautiful.
-- Keep token edits in `src/design-tokens/tokens.json`, then sync generated CSS/rules.
+**Presentational components — AI freely designs.** Cards, sections, headers, stat blocks, navigation appearance, data displays, hero sections, feature cards, dashboards — write whatever looks best for the product. Use the style prompt as design direction. No mandatory library.
 
-### Component Replacement Rules (Enforced)
+**Functional components — use Design Anchor.** These are interaction primitives where accessibility and behavior are critical:
+- `npx design-anchor add dialog alert-dialog` — focus trap, escape-to-close, overlay
+- `npx design-anchor add command` — Cmd/Ctrl+K, keyboard nav, fuzzy filtering
+- `npx design-anchor add select` — keyboard navigation, ARIA listbox
+- `npx design-anchor add popover dropdown-menu` — positioning, viewport overflow
+- `npx design-anchor add sheet` — slide-over panel, focus management
+- `npx design-anchor add tooltip` — delay, positioning, accessible description
+- `npx design-anchor add tabs` — keyboard arrow navigation, ARIA tablist
 
-When encountering substandard components during editing or governance, **do not report — replace immediately.** Read `references/layout-governance.md` Component Quality Standards section for the full replacement specification.
+Functional components from Design Anchor import from `@design` or `@/components/anchor-ui`. Do not import from `.anchor/` or `node_modules/design-anchor/`.
 
-Substandard means: raw HTML where a governed component exists, visually broken or inconsistent implementations, components that violate accessibility or interaction conventions, or custom implementations that duplicate what Design Anchor already provides.
+**Token constraint on everything.** Whether a component is freely written or from Design Anchor, structural colors must reference token CSS variables. See the Color section for what counts as structural vs decorative.
 
-**All component replacements must go through Design Anchor.** Do not introduce external component libraries directly — Design Anchor is the single entry point for governed components.
+**Effect libraries are encouraged.** MagicUI, Reactbits, or similar for visual enhancement. Install to `src/components/magicui/` or `src/components/effects/`.
 
-Replacement flow (two phases — structure first, then beauty):
+Keep token edits in `src/design-tokens/tokens.json`, then sync generated CSS/rules.
 
-**Phase 1: Complete structural replacement**
-1. Check if the component already exists in `@design` or `src/components/anchor-ui/`.
-2. If not, run `npx design-anchor add <component>` to install from Design Anchor's component registry.
-3. If Design Anchor does not have the component yet, write a new one in `src/components/anchor-ui/` that conforms to Design Anchor conventions (composable API, semantic token styling, accessibility). Then run `npx design-anchor sync` to register it and generate its spec.
-4. **Never** install Radix, cmdk, @tanstack/react-table, or other UI primitives as direct project dependencies just because a component needs them. Design Anchor bundles its own primitives — the `add` command handles the dependency chain.
+### Screenshot / Reference Image Rules
 
-**What to inherit from the original component — ONLY:**
-- Content: data, text, labels, values, items.
-- Business logic: event handlers, API calls, state management, data transformations, routing.
+When the user provides a screenshot, mockup, or reference image along with a request to generate UI:
 
-**What NOT to inherit:**
-- Layout position or placement — the new component's position is determined by Phase 1 (Layout Blueprint), not by where the old component sat.
-- CSS / styling / hardcoded colors — the new component uses Design Anchor conventions and gets styled in Phase 3.
-- DOM structure / wrapper divs — the new component has its own composable structure.
-- Inline styles, arbitrary Tailwind classes, or ad-hoc responsive hacks from the original.
+1. **Extract only content and business logic** from the reference: data structure, text, labels, field types, workflow steps, navigation items. The reference tells you WHAT the page does.
+2. **Completely redesign the layout.** Do not replicate the reference's spatial arrangement, section ordering, or component placement. Use Phase 1 (Layout Blueprint) to determine the best layout for this page's purpose.
+3. **Freely design all components.** Do not copy the reference's component styles, card shapes, button treatments, or visual patterns. Design from the style prompt.
+4. **Apply token-constrained colors.** Structural colors from tokens, decorative colors from the style prompt.
+5. **Tell the user explicitly:** `参考图中提取了内容和业务逻辑，布局和视觉已完全重新设计。`
 
-The old component is a data source, not a template. Extract its content and logic, discard everything else.
-
-**Phase 2: Apply visual styling from the style prompt**
-5. After replacing to standard implementation, apply the project's style prompt visual layer on top: color palette, shadow/depth treatment, border radius, typography weight, spacing rhythm, and decorative elements (accent borders, background tints, subtle gradients, icon styling) that match the product's design personality.
-6. A replaced component must look **better** than the original, not just structurally correct. If the standard component looks plain or generic, add visual richness from the style prompt until it matches the product's aesthetic quality.
-
-**The replaced component should feel like it was designed for this specific product — not like a default library component dropped in.**
-
-Key components that must meet Design Anchor quality standards — replace on sight if they do not:
-
-- **Sidebar / Navigation**: `npx design-anchor add sidebar`. Must be collapsible, grouped sections, active state, consistent icons, responsive drawer on mobile.
-- **Data Table**: `npx design-anchor add table`. Must have sortable headers, row selection, status badges, row action dropdown (not inline icons), pagination, empty/loading states.
-- **Form fields**: `npx design-anchor add input select textarea checkbox switch`. Must have visible labels, inline validation, section grouping, sticky submit bar.
-- **Dialog / Modal**: `npx design-anchor add dialog alert-dialog`. Must have focus trap, escape-to-close, overlay, accessible title.
-- **Command Palette**: `npx design-anchor add command`. Must have Cmd/Ctrl+K, keyboard nav, fuzzy filtering, grouped results.
-- **Tabs**: `npx design-anchor add tabs`. Must have keyboard arrow navigation, active indicator, ARIA roles.
-- **App Shell**: `npx design-anchor add sidebar` + project layout in `src/components/anchor-ui/app-shell.tsx`. Must provide consistent header + sidebar + content structure with responsive collapse.
-
-After every component replacement, verify with `npx design-anchor audit` and check the component spec at `.anchor/src/anchor/schema/components/`.
-
-When replacing:
-
-`Design Anchor 组件治理：[component] 不符合规范，已替换为标准实现并应用产品风格。`
+The reference image is a **content source**, not a design template. If the reference has poor layout, ugly components, or bad information architecture, those problems should not appear in the output.
 
 ### Layout Rules
 
@@ -466,7 +443,7 @@ Use the npm runtime for continuing work:
 - Install missing runtime: `npm install -D design-anchor`
 - Background activation and rule generation: `npx design-anchor sync`
 - Rebuild local `.anchor/`: `npx design-anchor hydrate`
-- Add a needed source component: `npx design-anchor add <component>`
+- Add a functional component (dialog, command, select, etc.): `npx design-anchor add <component>`
 - Extract tokens from a style prompt: `npx design-anchor theme <prompt-file.md>`
 - List internal style prompt metadata: `node scripts/list-style-prompts.mjs`
 - Open Portal intentionally: `npx design-anchor portal tokens`, `components`, `specs`, `theme`, or `docs`
@@ -484,10 +461,10 @@ All UI-related responses must use these standardized message templates.
 Design Anchor 预检：我会先判断项目成熟度和需求完整度；新页面会先匹配/抽取风格 token，已有完整产品会先征求你确认是否进入治理模式。
 ```
 
-### Auto-governance (token / component fix during editing)
+### Auto-governance (token fix during editing)
 
 ```
-Design Anchor 自动治理：已改为组件或语义 token。
+Design Anchor 自动治理：已将结构色对齐到语义 token。
 ```
 
 ### Layout governance (layout restructured)
@@ -496,29 +473,24 @@ Design Anchor 自动治理：已改为组件或语义 token。
 Design Anchor 布局治理：已根据页面用途重构布局。
 ```
 
-### Component replacement
+### Screenshot generation
 
 ```
-Design Anchor 组件治理：[原组件描述] → [新组件] + [视觉美化]。原因：[具体不达标项]。
+参考图中提取了内容和业务逻辑，布局和视觉已完全重新设计。
 ```
-
-Example: `Design Anchor 组件治理：自定义 div sidebar（无折叠、无分组、icon 混用）→ 标准 Sidebar 组件（可折叠、分组导航、统一 icon）+ 应用产品风格（深色侧边栏、品牌色 active 指示器）。`
 
 ### Self-check (required on every UI change)
 
 Every response that changes UI must end with a `Design Anchor 自检` line covering:
 
-- Visual quality (page looks polished and appealing, not stripped or plain)
+- Visual quality (page looks polished, colorful, and appealing — has visible design personality)
 - Layout quality (purpose-layout fit, information hierarchy)
-- Component reuse (governed components used, replacements made)
 - Icon consistency (single library, uniform size)
-- Token compliance (structural anchors consistent: primary, CTA, status, interactive states)
-- Auto-fixes applied
-- Unresolved items requiring user confirmation
+- Token compliance (structural anchor colors reference token CSS variables consistently)
 - Sync / audit status
 
 ```
-Design Anchor 自检：视觉 ✓ | 布局 ✓ | 组件 ✓ | icon ✓ | token ✓ | 自动修复 0 | 待确认 0 | sync ✓ audit ✓
+Design Anchor 自检：视觉 ✓ | 布局 ✓ | icon ✓ | token ✓ | sync ✓ audit ✓
 ```
 
 ## References
@@ -528,9 +500,9 @@ Read only what the task needs:
 - `references/project-contract.md` before installs, file-boundary decisions, source-vs-consumer detection, or component/token writes.
 - `references/govern-existing-product.md` before offering or executing governance for a mature existing product.
 - `references/layout-governance.md` before analyzing, auditing, or restructuring any page layout. Contains layout quality principles, reference examples for common page types (including AI product interfaces), icon governance rules, and information architecture principles.
-- `references/b2b-product-context.md` before creating product screens. Covers all product types including AI tools, creative tools, and developer tools.
+- `references/product-context.md` before creating product screens. Covers all product types including AI tools, creative tools, and developer tools.
 - `references/style-source-selection.md` before matching incomplete input to an internal style prompt.
-- `references/b2b-design-prompt-pool.md` when selecting an internal prompt.
+- `references/design-prompt-pool.md` when selecting an internal prompt.
 - `references/style-prompt-guidance.md` before turning a user style prompt into tokens.
 - `references/portal-routing.md` before opening Portal or answering Portal intent questions.
 

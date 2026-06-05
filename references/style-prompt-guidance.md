@@ -56,7 +56,7 @@ npx design-anchor sync
 npx design-anchor audit
 ```
 
-5. Generate the first page with the extracted style, product context, `@design` components, and semantic tokens.
+5. Generate the first page with the extracted style, product context, functional components from Design Anchor, and semantic tokens. Presentational components are freely designed based on the style prompt.
 6. Open `npx design-anchor portal tokens` only when the user wants to inspect or tune the result.
 
 ## Internal Prompt Flow
@@ -65,7 +65,7 @@ Use this when the user asks for a page or product but does not provide enough st
 
 1. Read `style-source-selection.md`.
 2. Ask one concise heuristic question if needed.
-3. Select one prompt from `b2b-design-prompt-pool.md`.
+3. Select one prompt from `design-prompt-pool.md`.
 4. Do not reveal the internal prompt name.
 5. Tell the user: `我帮你匹配到一个适合这个场景的风格方向，会先转成 token，再生成页面。`
 6. Save the selected prompt into `.anchor/design-prompt-source.md` or `design-prompt.md`.
@@ -73,7 +73,7 @@ Use this when the user asks for a page or product but does not provide enough st
 
 ## Product Restraint
 
-Most Design Anchor users are building functional products (B2B, SaaS, AI tools, internal tools). The style prompt must balance visual richness with product usability:
+Most Design Anchor users are building functional products (SaaS, AI tools, consumer apps, internal tools). The style prompt must balance visual richness with product usability:
 
 - Use the style prompt's color palette, typography, shadow system, and signature elements to make pages visually compelling.
 - Keep density appropriate for the workflow — monitoring is dense, settings breathe.

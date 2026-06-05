@@ -4,7 +4,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
-const defaultPromptDir = resolve(scriptDir, "../references/b2b-design-prompts");
+const defaultPromptDir = resolve(scriptDir, "../references/design-prompts");
 const promptDir = resolve(process.argv[2] || defaultPromptDir);
 
 function parseFrontmatter(text) {

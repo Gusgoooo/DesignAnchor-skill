@@ -31,7 +31,7 @@ If the user already gave enough product context, you may infer without asking an
 
 ## Prompt Discovery
 
-Prompt files live under `b2b-design-prompts/*.md`. The skill maintainer can add new prompts by adding one markdown file per prompt. Each file must include the standard frontmatter described in `b2b-design-prompt-pool.md`.
+Prompt files live under `design-prompts/*.md`. The skill maintainer can add new prompts by adding one markdown file per prompt. Each file must include the standard frontmatter described in `design-prompt-pool.md`.
 
 List available prompt metadata with:
 
@@ -39,7 +39,7 @@ List available prompt metadata with:
 node "${CLAUDE_SKILL_DIR:-skills/design-anchor}/scripts/list-style-prompts.mjs"
 ```
 
-If the script path is unavailable, inspect `references/b2b-design-prompts/*.md` and read only each file's frontmatter before selecting.
+If the script path is unavailable, inspect `references/design-prompts/*.md` and read only each file's frontmatter before selecting.
 
 ## Matching Rule
 
@@ -59,7 +59,7 @@ The existing prompt files are starter examples. New maintainer-added files are e
 2. Save the prompt into the target project, usually `.anchor/design-prompt-source.md`.
 3. Run `npx design-anchor theme <prompt.md>`.
 4. Sync rules with `npx design-anchor sync`.
-5. Generate the first page with `@design` components and semantic tokens.
+5. Generate the first page with functional components from Design Anchor and semantic tokens. Presentational components are freely designed.
 6. Run audit when UI changed.
 
 Never expose the internal prompt filename unless the user explicitly asks how matching works.

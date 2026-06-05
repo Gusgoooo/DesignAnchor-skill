@@ -4,9 +4,9 @@
 
 Design Anchor Skill is the AI entry layer for the [`design-anchor`](https://www.npmjs.com/package/design-anchor) npm package, running as a Claude Code Agent Skill.
 
-It solves a core problem: **AI-written UI goes out of control in long-term projects** — style drift, inconsistent layouts, mixed component usage, icon library conflicts. Design Anchor makes AI read the project's tokens, component constraints, and layout quality principles before writing any code, ensuring page 100 follows the same rules as page 1.
+It solves a core problem: **AI-written UI goes out of control in long-term projects** — style drift, inconsistent layouts, mixed component usage, icon library conflicts. Design Anchor makes AI read the project's tokens, component strategy (functional primitives from Design Anchor, presentational freely designed), and layout quality principles before writing any code, ensuring page 100 follows the same rules as page 1.
 
-Works with all product types: B2B platforms, SaaS tools, AI products (ChatGPT/Gemini-style), creative tools, developer tools — any interface where users do real work.
+Works with all product types: SaaS tools, AI products, consumer apps, creative tools, developer tools — any interface where users do real work.
 
 ## Core Capabilities
 
@@ -34,7 +34,7 @@ Works with all product types: B2B platforms, SaaS tools, AI products (ChatGPT/Ge
 - `audit` — Compliance check after UI changes
 - `portal` — Open the design system inspection panel on demand (tokens / components / specs / docs)
 
-**Style Prompt Pool** — Built-in style templates under `references/b2b-design-prompts/` (Stripe-like, Linear-like, HUD dark, minimal dark, Google-like, generic SaaS, etc.), auto-matched to user scenarios via frontmatter metadata. Preset names are never exposed to users.
+**Style Prompt Pool** — Built-in style templates under `references/design-prompts/` (Stripe-like, Linear-like, HUD dark, minimal dark, Google-like, generic SaaS, etc.), auto-matched to user scenarios via frontmatter metadata. Preset names are never exposed to users.
 
 ## Directory Structure
 
@@ -50,19 +50,19 @@ design-anchor/
     ├── project-contract.md           # File boundaries & source/consumer detection
     ├── govern-existing-product.md    # Existing product governance (layout restructuring first)
     ├── layout-governance.md          # Layout governance: quality principles, reference examples, icon rules
-    ├── b2b-product-context.md        # Product context: page purpose categories + anti-patterns
+    ├── product-context.md        # Product context: page purpose categories + anti-patterns
     ├── style-source-selection.md     # Style matching decisions
     ├── style-prompt-guidance.md      # Style prompt → token guide
-    ├── b2b-design-prompt-pool.md     # Prompt pool format spec
+    ├── design-prompt-pool.md     # Prompt pool format spec
     ├── portal-routing.md             # Portal routing intent
-    └── b2b-design-prompts/           # Built-in style prompt pool
+    └── design-prompts/           # Built-in style prompt pool (26 curated prompts)
         ├── _template.md
-        ├── stripe.md
-        ├── linear.md
-        ├── google-style.md
-        ├── hud-dark-style.md
-        ├── minimal-dark.md
-        └── saas-style-01.md
+        ├── linear.md              # Cinematic dark premium
+        ├── saas.md                # Modern light SaaS
+        ├── google-style.md        # Friendly platform
+        ├── cyberpunk-ui.md        # Cyberpunk neon dark
+        ├── bauhaus.md             # Bauhaus geometric
+        └── ...                    # 20+ more covering distinct visual directions
 ```
 
 ## Installation
@@ -109,7 +109,7 @@ Business code imports from `@design` or `@/components/anchor-ui` only. Never imp
 When the probe script detects a mature product, the skill defaults to recommending **layout restructuring**, not conservative token patching:
 
 - **Layout restructuring** (recommended) — Analyze layout, information architecture, component usage, and icon consistency page by page, then rebuild the UI layer while preserving all business logic and data bindings
-- **Progressive optimization** — Only fix token compliance, import paths, and raw primitive replacement. Keeps existing layout unchanged
+- **Progressive optimization** — Only fix token compliance, import paths, and functional primitive accessibility (dialog, select, etc.). Keeps existing layout unchanged
 - **Read-only audit** — Scan and report only, no file changes
 
 Layout restructuring is executed page by page, with each page individually confirmed before changes begin.
@@ -132,7 +132,7 @@ Reference examples cover: data workspaces, detail pages, dashboards, forms, chat
 
 ## Extending the Prompt Pool
 
-Add a `.md` file under `references/b2b-design-prompts/`. The file must start with standard frontmatter:
+Add a `.md` file under `references/design-prompts/`. The file must start with standard frontmatter:
 
 ```yaml
 ---

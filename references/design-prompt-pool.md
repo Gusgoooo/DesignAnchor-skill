@@ -1,11 +1,11 @@
 # Design Prompt Pool
 
-This folder is an extensible internal prompt pool for Design Anchor Skill. Use it when the user's own design prompt is incomplete. The prompts cover all product types — B2B, SaaS, AI tools, developer tools, and creative tools.
+This folder is an extensible internal prompt pool for Design Anchor Skill. Use it when the user's own design prompt is incomplete. The prompts cover all product types — SaaS, AI tools, consumer apps, developer tools, creative tools, and any functional interface.
 
 The skill maintainer can expand this pool by dropping markdown files into:
 
 ```text
-references/b2b-design-prompts/
+references/design-prompts/
 ```
 
 Each prompt is one file. The file must start with standard frontmatter that explains when the prompt is appropriate. The skill uses that metadata internally to match the end user's request, then loads only the selected prompt and translates it into Design Anchor tokens. End users are not asked to manage or choose files from this pool.
@@ -61,4 +61,4 @@ Write the actual style prompt here.
 6. Run `npx design-anchor theme <prompt.md>`.
 7. Use the resulting tokens with the user's product context to generate the first page.
 
-Component specs and semantic tokens remain stronger than the prompt.
+Semantic tokens and functional component accessibility remain stronger than the prompt. Presentational component visual design is driven by the prompt.

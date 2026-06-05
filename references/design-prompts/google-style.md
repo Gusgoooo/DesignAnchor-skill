@@ -24,7 +24,7 @@ mode: "light"
 
 # Internal Style Prompt: Friendly Platform
 
-Design a friendly B2B platform interface that feels approachable, clear, and easy to adopt. It should suit CRM, support, education, broad internal tools, onboarding-heavy workflows, configuration, and team collaboration.
+Design a friendly platform interface that feels approachable, clear, and easy to adopt. It should suit CRM, support, education, broad internal tools, onboarding-heavy workflows, configuration, and team collaboration.
 
 Use comfortable spacing, plain-language labels, clear sections, recognizable controls, readable cards/tables, and helpful state messaging. The interface should reduce anxiety and make complex workflows feel manageable without becoming playful or decorative.
 

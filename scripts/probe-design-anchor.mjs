@@ -91,7 +91,8 @@ function hasDesignAlias() {
 
 function gitignoreHasAnchor() {
   const gitignore = readText(join(target, ".gitignore"));
-  return /(^|\n)\s*\.anchor\/?\s*(\n|$)/.test(gitignore);
+  const gitExclude = readText(join(target, ".git/info/exclude"));
+  return /(^|\n)\s*\.anchor\/?\s*(\n|$)/.test(`${gitignore}\n${gitExclude}`);
 }
 
 function mcpConfigFiles() {
@@ -112,6 +113,15 @@ function hasPortableMcpConfig() {
         && commandLine.includes("./.anchor");
     });
   });
+}
+
+function hasGovernanceBridge() {
+  return has("AGENTS.md")
+    || has("CLAUDE.md")
+    || has(".cursorrules")
+    || has(".cursor/rules/anchor.mdc")
+    || has(".github/copilot-instructions.md")
+    || hasPortableMcpConfig();
 }
 
 function installCommand(pm) {
@@ -293,6 +303,109 @@ function detectCssStrategy(pkg) {
   return strategies;
 }
 
+function detectTechStackFit(pkg, framework, cssStrategies, signals) {
+  if (!pkg) {
+    return {
+      level: "unknown",
+      label: "No package.json detected",
+      installPolicy: "confirm-app-root",
+      canAutoInstallRuntime: false,
+      canInstallComponents: false,
+      notes: ["Confirm the app root before installing Design Anchor."],
+    };
+  }
+
+  const names = dependencyNames(pkg);
+  const hasReact = names.has("react")
+    || ["next", "remix", "vite-react", "react"].includes(framework);
+  const hasTailwind = cssStrategies.includes("tailwind") || signals.hasTailwindConfig;
+  const isFullReactWeb = hasReact && hasTailwind
+    && ["next", "remix", "vite-react", "react"].includes(framework);
+  const isAstroReact = framework === "astro" && hasReact && hasTailwind;
+  const isNonReactWeb = ["vue", "nuxt", "svelte", "sveltekit"].includes(framework)
+    || names.has("@angular/core")
+    || names.has("solid-js");
+  const isNativeMobile = names.has("react-native")
+    || names.has("expo")
+    || names.has("@react-native/core")
+    || names.has("@flutter-js/core");
+
+  if (isFullReactWeb) {
+    return {
+      level: "full",
+      label: "React + Tailwind web app",
+      installPolicy: "auto-for-implementation",
+      canAutoInstallRuntime: true,
+      canInstallComponents: true,
+      notes: ["Full Design Anchor runtime path is appropriate for implementation work."],
+    };
+  }
+
+  if (hasReact && !hasTailwind) {
+    return {
+      level: "partial",
+      label: "React without Tailwind",
+      installPolicy: "ask-before-runtime",
+      canAutoInstallRuntime: false,
+      canInstallComponents: false,
+      notes: ["Confirm token CSS/Tailwind integration before installing runtime or components."],
+    };
+  }
+
+  if (isAstroReact) {
+    return {
+      level: "partial",
+      label: "Astro with React islands + Tailwind",
+      installPolicy: "ask-before-runtime",
+      canAutoInstallRuntime: false,
+      canInstallComponents: false,
+      notes: ["Install only after confirming the target React island uses the compatible setup."],
+    };
+  }
+
+  if (isNonReactWeb) {
+    return {
+      level: "design-guidance",
+      label: `${framework || "non-React"} web app`,
+      installPolicy: "do-not-install-by-default",
+      canAutoInstallRuntime: false,
+      canInstallComponents: false,
+      notes: ["Use Design Anchor for design guidance/token thinking; offer an adaptation plan before installing runtime."],
+    };
+  }
+
+  if (isNativeMobile) {
+    return {
+      level: "not-direct-runtime-target",
+      label: "native/mobile app",
+      installPolicy: "do-not-install",
+      canAutoInstallRuntime: false,
+      canInstallComponents: false,
+      notes: ["Do not install runtime/components; use prompt, token, layout, and visual guidance only."],
+    };
+  }
+
+  if (hasTailwind && !hasReact) {
+    return {
+      level: "partial",
+      label: "Tailwind without detected React",
+      installPolicy: "ask-before-runtime",
+      canAutoInstallRuntime: false,
+      canInstallComponents: false,
+      notes: ["Confirm framework and integration target before installing runtime."],
+    };
+  }
+
+  return {
+    level: "unknown",
+    label: framework || "unknown frontend stack",
+    installPolicy: "inspect-before-install",
+    canAutoInstallRuntime: false,
+    canInstallComponents: false,
+    notes: ["Inspect package/framework files before installing Design Anchor."],
+  };
+}
+
 function projectSignals(pkg) {
   const uiExtensions = [".tsx", ".jsx", ".vue", ".svelte"];
   const styleExtensions = [".css", ".scss", ".sass", ".less"];
@@ -349,6 +462,16 @@ const tableLibrary = detectTableLibrary(pkg);
 const stateManagement = detectStateManagement(pkg);
 const validationLibrary = detectValidationLibrary(pkg);
 const cssStrategies = detectCssStrategy(pkg);
+const techStackFit = isSourceRepo
+  ? {
+    level: "source-package",
+    label: "Design Anchor source repo",
+    installPolicy: "use-package-scripts",
+    canAutoInstallRuntime: false,
+    canInstallComponents: false,
+    notes: ["Edit package source directly; do not run consumer install/start here."],
+  }
+  : detectTechStackFit(pkg, framework, cssStrategies, signals);
 
 const result = {
   target,
@@ -370,18 +493,24 @@ const result = {
     || has(".anchor/src/anchor-portal/vite.config.ts")
     || has(".anchor/src/anchor/schema"),
   anchorIsGitignored: gitignoreHasAnchor(),
-  hasInstalledComponents: has("src/components/anchor-ui/index.ts")
+  hasInstalledComponents: has("src/components/index.ts")
+    || has("src/components/anchor-ui/index.ts")
     || has("src/components/anchor-ui"),
-  hasTokenSource: has("src/design-tokens/tokens.json"),
-  hasGeneratedTokenCss: has("src/styles/design-tokens.generated.css"),
+  hasTokenSource: has("design-tokens.json"),
+  hasLegacyTokenSource: has("src/design-tokens/tokens.json"),
+  hasGeneratedTokenCss: has(".anchor/design-tokens.generated.css"),
+  hasLegacyGeneratedTokenCss: has("src/styles/design-tokens.generated.css"),
   hasDesignAlias: hasDesignAlias(),
   hasAgentsRules: has("AGENTS.md"),
   hasClaudeRules: has("CLAUDE.md"),
+  hasCursorRules: has(".cursorrules"),
   hasCursorAlwaysRules: has(".cursor/rules/anchor.mdc"),
   hasCursorSelfcheckRule: has(".cursor/rules/anchor-selfcheck.mdc"),
   mcpConfigFiles: mcpConfigFiles(),
   hasPortableMcpConfig: hasPortableMcpConfig(),
+  hasGovernanceBridge: hasGovernanceBridge(),
   framework,
+  techStackFit,
   componentLibraries,
   cssStrategies,
   formLibrary,
@@ -410,42 +539,56 @@ if (isSourceRepo) {
     result.recommendedNextSteps.push("This looks like an existing product. Offer `布局重构`（recommended）, `渐进优化`, or `只读审计`; do not modify files until the user explicitly confirms the governance mode.");
   }
 
+  if (techStackFit.level !== "full" && techStackFit.level !== "unknown") {
+    result.recommendedNextSteps.push(`Tech stack fit: ${techStackFit.label} (${techStackFit.level}). ${techStackFit.notes.join(" ")}`);
+  }
+
   if (result.hasMultipleIconLibraries) {
     result.recommendedNextSteps.push(`Multiple icon libraries detected: ${iconLibraries.join(", ")}. Recommend consolidating to a single library (preferably lucide-react).`);
   }
 
   if (!result.designAnchorDependency && !result.designAnchorNodeModuleVersion) {
-    result.recommendedNextSteps.push(`Install Design Anchor as a dev dependency with \`${installCommand(pm)}\`.`);
+    if (techStackFit.canAutoInstallRuntime) {
+      result.recommendedNextSteps.push(`For implementation work, first establish the Design Anchor token baseline: install the runtime with \`${installCommand(pm)}\`, then run sync.`);
+    } else if (techStackFit.installPolicy === "ask-before-runtime" || techStackFit.installPolicy === "inspect-before-install") {
+      result.recommendedNextSteps.push(`Do not auto-install Design Anchor yet. ${techStackFit.notes.join(" ")} If the user confirms adaptation, start with \`${installCommand(pm)}\` and sync.`);
+    } else {
+      result.recommendedNextSteps.push(`Do not install Design Anchor runtime/components by default for this stack. ${techStackFit.notes.join(" ")}`);
+    }
   }
 
-  const needsBackgroundSync = !result.hasTokenSource
-    || !result.hasGeneratedTokenCss
-    || !result.hasAgentsRules
-    || !result.hasCursorAlwaysRules
-    || !result.hasPortableMcpConfig;
+  const needsBackgroundSync = !result.hasAnchorControlPlane
+    || !result.hasTokenSource
+    || !result.hasGeneratedTokenCss;
 
-  if (needsBackgroundSync) {
-    result.recommendedNextSteps.push(`Run \`${syncCommand(pm)}\` for background governance: tokens, generated CSS, AI rules, MCP config, and local .anchor hydration.`);
+  if (needsBackgroundSync && (techStackFit.canAutoInstallRuntime || result.designAnchorDependency || result.designAnchorNodeModuleVersion)) {
+    result.recommendedNextSteps.push(`Run \`${syncCommand(pm)}\` to create/refresh the token baseline: .anchor, root design-tokens.json, generated token CSS, Tailwind extensions, and local rules.`);
   }
 
-  if (!result.hasAnchorControlPlane && (result.hasTokenSource || result.hasAgentsRules || result.hasPortableMcpConfig)) {
+  if (!result.hasAnchorControlPlane && (result.hasTokenSource || result.hasLegacyTokenSource || result.hasGovernanceBridge)) {
     result.recommendedNextSteps.push(`.anchor/ is local and rebuildable; run \`${hydrateCommand(pm)}\` if Portal, specs, or MCP runtime files are missing after clone.`);
   }
 
   if (!result.anchorIsGitignored) {
-    result.recommendedNextSteps.push("Add `.anchor/` to .gitignore so the local control plane stays rebuildable and out of source control.");
+    result.recommendedNextSteps.push("Ensure `.anchor/` is ignored via local git exclude or .gitignore so the local control plane stays rebuildable and out of source control.");
   }
 
-  if (!result.hasInstalledComponents) {
-    result.recommendedNextSteps.push(`No Anchor UI source components are installed yet; add only what the current screen needs with \`${addCommand(pm)}\`.`);
+  if (!result.hasInstalledComponents && techStackFit.canInstallComponents) {
+    result.recommendedNextSteps.push(`No Design-anchor component source is installed yet; add only what the current screen needs with \`${addCommand(pm)}\`.`);
+  } else if (!techStackFit.canInstallComponents) {
+    result.recommendedNextSteps.push("Do not run `design-anchor add` unless the target UI surface is confirmed as React + Tailwind-compatible.");
   }
 
   if (result.hasInstalledComponents && !result.hasDesignAlias) {
-    result.recommendedNextSteps.push("Check the `@design` path alias before writing app UI; business code should import from `@design` or `@/components/anchor-ui`.");
+    result.recommendedNextSteps.push("Check the `@design` path alias before writing app UI; business code should import from `@design` or `@/components`.");
   }
 
   if (!needsBackgroundSync && result.hasInstalledComponents) {
     result.recommendedNextSteps.push("Design Anchor appears ready; continue with `@design` components, semantic tokens, `sync`, and `audit` after UI changes.");
+  }
+
+  if (signals.projectMaturity !== "new-or-small" && !result.hasGovernanceBridge) {
+    result.recommendedNextSteps.push("No optional AI governance bridge detected. Run `npx design-anchor govern` only if the team wants root-level AGENTS/CLAUDE/Cursor/MCP bridge files.");
   }
 
   if (componentLibraries.length > 1) {
@@ -458,11 +601,11 @@ if (isSourceRepo) {
   }
 
   if (signals.projectMaturity !== "new-or-small" && !formLibrary) {
-    result.recommendedNextSteps.push("No form library detected in an established project. Recommend react-hook-form + zod for governed form components.");
+    result.recommendedNextSteps.push("No form library detected in an established project. Reuse existing form patterns; suggest a dedicated form library only if the user asks for form-system standardization.");
   }
 
   if (signals.projectMaturity !== "new-or-small" && !tableLibrary && signals.componentFiles > 5) {
-    result.recommendedNextSteps.push("No table library detected. Recommend @tanstack/react-table for governed data tables with sort, filter, and pagination.");
+    result.recommendedNextSteps.push("No table library detected. Reuse existing table/list patterns; suggest a dedicated table library only if advanced data-table behavior is requested and approved.");
   }
 
   if (layoutSignals.hasLayoutComponents && !layoutSignals.hasSidebarComponent && !layoutSignals.hasShellComponent) {

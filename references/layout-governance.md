@@ -223,34 +223,45 @@ Layout instincts:
 
 Components split into two categories: functional and presentational. This distinction drives all component decisions during layout governance.
 
-### Functional Components — Design Anchor Required
+### Functional Components — Install Only When Needed
 
-These are interaction primitives where accessibility, focus management, and keyboard behavior are critical. When they are implemented as raw HTML or custom code without proper accessibility, replace them with Design Anchor primitives.
+These are interaction primitives where accessibility, focus management, and keyboard behavior are critical. When they are implemented as raw HTML or custom code without proper accessibility, replace them with Design Anchor primitives. If the project already has an accessible equivalent, reuse or lightly adapt it instead of installing a duplicate.
+
+Use this decision rule before `npx design-anchor add`:
+
+| Situation | Decision |
+|---|---|
+| Production UI needs a missing dialog/select/popover/command/tabs primitive | Install the smallest matching Design Anchor primitive. |
+| Existing project component already handles focus, keyboard, ARIA, and viewport behavior | Do not install; reuse it. |
+| Read-only audit, planning, documentation, token extraction, or Portal inspection | Do not install; report recommendation only. |
+| Purely presentational UI | Do not install a Design Anchor primitive. Design or adapt existing components. |
+| User asked for no new files/dependencies | Do not install; ask before adding anything. |
+| Install would introduce a broad dependency stack for one narrow interaction | Do not install; use existing primitives or ask for explicit approval. |
 
 **Dialog / Modal:**
 - Must have: focus trap, escape-to-close, overlay, accessible title (`aria-labelledby`), content scrolls inside dialog.
 - Confirmation dialogs need clear action labels ("Delete project" not "OK") and destructive button variant.
 - Replace when: raw `<div>` with `position: fixed` and no focus trap, or no escape-to-close.
-- Install: `npx design-anchor add dialog` or `npx design-anchor add alert-dialog`.
+- Install when needed: `npx design-anchor add dialog` or `npx design-anchor add alert-dialog`.
 
 **Command Palette / Search:**
 - Must have: keyboard shortcut (Cmd/Ctrl+K), arrow key navigation, fuzzy filtering, grouped results, escape-to-close.
 - Replace when: plain `<input>` with manually managed dropdown, no keyboard navigation.
-- Install: `npx design-anchor add command`.
+- Install when needed: `npx design-anchor add command`.
 
 **Tabs:**
 - Must have: keyboard arrow navigation between tabs, active visual indicator, ARIA `role="tabpanel"` with `aria-labelledby`.
 - Replace when: styled `<button>` groups without ARIA roles or keyboard navigation.
-- Install: `npx design-anchor add tabs`.
+- Install when needed: `npx design-anchor add tabs`.
 
 **Select / Dropdown:**
 - Must have: keyboard navigation, ARIA listbox semantics, viewport overflow handling.
 - Replace when: raw `<select>` or custom dropdown without keyboard support.
-- Install: `npx design-anchor add select` or `npx design-anchor add dropdown-menu`.
+- Install when needed: `npx design-anchor add select` or `npx design-anchor add dropdown-menu`.
 
 **Popover / Sheet / Tooltip:**
 - Must have: proper positioning, focus management, dismissal behavior.
-- Install: `npx design-anchor add popover`, `npx design-anchor add sheet`, `npx design-anchor add tooltip`.
+- Install when needed: `npx design-anchor add popover`, `npx design-anchor add sheet`, `npx design-anchor add tooltip`.
 
 ### Presentational Components — AI Freely Designs, But Has Quality Standards
 
@@ -269,7 +280,7 @@ A sidebar is the backbone of product navigation. A bad sidebar makes the entire 
 - Icons consistent in library, size, and style — one icon per nav item, aligned.
 - Nested items with expandable/collapsible groups for deep navigation.
 - User/org section at bottom or top with avatar, name, and account menu.
-- Responsive: on mobile, sidebar becomes a drawer or sheet overlay (use Design Anchor `sheet` for the overlay behavior).
+- Responsive: on mobile, sidebar becomes a drawer or sheet overlay (reuse an existing accessible sheet/drawer, or install Design Anchor `sheet` only if missing).
 - Keyboard accessible: focusable items, arrow key navigation.
 - Uses semantic tokens for structural colors — no hardcoded hex for primary/active states.
 
@@ -343,7 +354,7 @@ When any presentational component fails its quality criteria, the AI should:
 1. Flag it in the audit or restructuring analysis.
 2. Redesign it freely based on the style prompt — use the product's color palette, typography, shadow approach, and signature elements.
 3. Preserve all data bindings, event handlers, routes, and business logic from the original.
-4. Prefer open-source blocks (shadcn blocks, shadcn-admin, Kibo UI, etc.) as structural starting points when they match, then customize extensively with the style prompt.
+4. Check open-source block patterns (shadcn blocks, shadcn-admin, Kibo UI, etc.) as structural references when they match, then customize extensively with the style prompt. Install only when the project tooling, user intent, and dependency budget justify it; full starters are reference-only unless explicitly requested.
 5. The result should look like it was custom-designed for this specific product — not a library default.
 
 **Token constraint applies to all.** Whether functional or presentational, structural colors (primary, CTA, status, foreground, background) must reference token CSS variables. Decorative colors, gradients, shadows, and accents are free.

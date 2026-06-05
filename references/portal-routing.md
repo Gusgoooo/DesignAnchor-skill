@@ -29,7 +29,7 @@ npx design-anchor portal tokens
 After opening Portal, tell the user:
 
 - which tab opened,
-- which source-of-truth files matter,
+- which source-of-truth files matter (`design-tokens.json` for tokens, `src/components/` for installed components, `.anchor/` for rebuildable control-plane state),
 - what you will run after they finish editing, usually `sync` and possibly `audit`.
 
 If the user asks the AI to make the change instead of using Portal, edit the source of truth directly, run sync/audit, and summarize the Design Anchor self-check.

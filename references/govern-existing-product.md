@@ -1,6 +1,6 @@
 # Govern Existing Product
 
-Read this when Design Anchor detects a mature existing product. This file is self-contained — it includes all layout principles, component strategy, and audit criteria needed for execution. You do not need to load `layout-governance.md` separately when using this file, though it remains available as extended reference.
+Read this when Design Anchor detects a mature existing product. This file contains the main governance workflow, layout principles, component strategy, and audit criteria needed for execution. You do not need to load `layout-governance.md` separately when using this file, though it remains available as extended reference. Read `visual-craft.md` during Phase 3 when the page needs final polishing or beauty recovery.
 
 ## Design Philosophy
 
@@ -34,6 +34,21 @@ Default recommendation is layout restructuring. Say so explicitly.
 
 Do not proceed with file changes until the user says a clear confirmation such as `确认，开始重构`, `开始布局重构`, `restructure`, or `我同意，开始`.
 
+## Designer-Led Governance
+
+Do not wait for the user to tell you which page is most important. After the read-only scan, recommend the first page or area to govern based on visible product risk:
+
+1. Start with the page that carries the primary workflow or first impression.
+2. If there is no obvious primary page, start with the most reused shell/navigation pattern.
+3. If visual drift is severe, start with token/icon cleanup across touched surfaces before page restructuring.
+4. If interaction risk is high, start with the page containing dialogs, selects, command palettes, sheets, or destructive actions.
+
+Phrase the recommendation as design judgment, not permission-seeking:
+
+`我建议先治理 <页面/区域>，因为它决定了用户的主要工作流/第一印象/复用结构。本轮只处理这一页，确认后我再动文件。`
+
+Broad edits still require explicit confirmation. Proactive guidance chooses and explains the next step; it does not silently rewrite mature products.
+
 ## Layout Quality Principles (Inline Reference)
 
 Use these principles to evaluate every page. They replace template matching — AI designs the best layout for each page's purpose, then verifies against these criteria.
@@ -56,9 +71,9 @@ Use these principles to evaluate every page. They replace template matching — 
 
 Components split into two categories:
 
-### Functional Components — Use Design Anchor
+### Functional Components — Use Design Anchor Selectively
 
-These are interaction primitives where accessibility, focus management, and keyboard behavior are critical. Use `npx design-anchor add <component>` to install.
+These are interaction primitives where accessibility, focus management, and keyboard behavior are critical. Use `npx design-anchor add <component>` only when the current confirmed implementation needs the primitive and the project does not already have an accessible equivalent.
 
 - **Dialog / Modal**: `dialog`, `alert-dialog` — focus trap, escape-to-close, overlay, accessible title.
 - **Command Palette**: `command` — Cmd/Ctrl+K, keyboard nav, fuzzy filtering.
@@ -66,7 +81,7 @@ These are interaction primitives where accessibility, focus management, and keyb
 - **Popover / Sheet / Tooltip**: `popover`, `sheet`, `tooltip` — positioning, focus management.
 - **Tabs**: `tabs` — keyboard arrow navigation, ARIA tablist.
 
-Import from `@design` or `@/components/anchor-ui/`. Do not import from `.anchor/` or `node_modules/design-anchor/`.
+Import from `@design` or `@/components`. Do not import from `.anchor/` or `node_modules/design-anchor/`.
 
 ### Presentational Components — AI Freely Designs
 
@@ -271,7 +286,7 @@ For each page, apply the replacement map:
 5. **Verify each replacement visually** — the page should look the same or better after replacement, not washed out.
 6. **Skip decorative colors** — leave gradients, accent tints, illustration colors, shadows, and intentional one-offs untouched.
 
-**Critical: after replacing, verify that `tokens.json` has the correct values.** If the project's primary was `indigo-600` (#4f46e5), `tokens.json` must define `--primary: #4f46e5` (or the HSL equivalent). The replacement only works if the token value matches the original color the product was using. If the token value is wrong, fix `tokens.json` first, then run `npx design-anchor sync`.
+**Critical: after replacing, verify that root `design-tokens.json` has the correct seed values.** If the project's primary was `indigo-600` (#4f46e5), `design-tokens.json` should set `seed.colorPrimary` to `#4f46e5` (or the equivalent semantic seed). The replacement only works if the token value matches the original color the product was using. If the token value is wrong, fix `design-tokens.json` first, then run `npx design-anchor sync`.
 
 #### Step 5: Cross-page consistency check
 
@@ -299,11 +314,11 @@ When the user confirms layout restructuring:
 
 Before starting any page work, ensure a style prompt is active. This prompt drives the page-level beautification phase:
 
-1. Check if the project already has a design prompt source (`.anchor/design-prompt-source.md` or `design-prompt.md`). If yes, reuse it.
+1. Check if the project already has a design prompt source (`.anchor/design-prompt.md` or `design-prompt.md`). If yes, reuse it.
 2. If not, select an appropriate prompt from the built-in pool based on the product's type, industry, tone, and density. Use `scripts/list-style-prompts.mjs` or scan `references/design-prompts/*.md` and match against frontmatter metadata.
 3. If the user provided style direction, use that instead of the pool.
 4. Do not reveal the internal prompt name. Tell the user: `我为你的产品匹配了一个风格方向，会在治理过程中用它来提升页面视觉品质。`
-5. Save the selected prompt into `.anchor/design-prompt-source.md`.
+5. Save the selected prompt into `.anchor/design-prompt.md`.
 6. Read `references/style-prompt-guidance.md` before applying.
 
 ### Per-Page Flow (follows the Page Rendering Pipeline)
@@ -313,14 +328,16 @@ Before starting any page work, ensure a style prompt is active. This prompt driv
 1. **Read the page source completely.** Understand every component, every data binding, every event handler.
 2. **Classify page nature** — Functional（工具型）or Showcase（展示型）. Default is Functional. See SKILL.md Phase 1 for criteria.
 3. **Identify the page's primary user task** and evaluate the current layout against the quality principles.
-4. **Match an open-source block as the page scaffold.** This is the default workflow, not optional:
+4. **Evaluate whether an open-source block should become the page scaffold.** Check known block sources first, but install/adopt one only when it fits the confirmed implementation scope, project tooling, page purpose, and dependency budget:
    - Dashboard / sidebar / settings / auth → `npx shadcn@latest add <block-name>` (sidebar-01~15, dashboard-01~07, login-01~05)
    - Extended patterns (kanban, gantt, timeline, file tree) → `npx kibo-ui add <block-name>`
    - Landing / showcase pages (hero, navbar, footer, pricing, FAQ) → `npx shadcn@latest add @launchui/<block>`
    - E-commerce (product cards, banners, cart, reviews) → `npx shadcn@latest add https://ui.stackzero.co/r/<block>.json`
-   - Admin CRUD starter → clone `shadcn-admin` (full template, not composable)
-   - Use the matched block's structure (layout, spacing, responsive breakpoints, component arrangement) as the new page skeleton. Modify freely based on actual needs, but start from a production-quality scaffold, not from scratch.
-   - Only design from zero when no block matches. Even then, combine patterns from multiple blocks.
+   - Admin CRUD starter → use `shadcn-admin` as reference-only unless the user explicitly wants a full starter; it is a full template, not a composable block
+   - Use the matched block's structure (layout, spacing, responsive breakpoints, component arrangement) as the new page skeleton only when it reduces risk and churn.
+   - If installing a block would add unwanted dependencies/files, use it as reference only and reproduce the relevant pattern inside existing project files.
+   - If the block would pull in broad dependencies for a narrow layout need, do not install it. Use it as a reference pattern.
+   - Design from zero when no block matches, when the existing app shell is better, or when the user requested minimal/no-install changes.
 
 **Phase 2 — Component Composition:**
 
@@ -330,8 +347,8 @@ Before starting any page work, ensure a style prompt is active. This prompt driv
    - Forms: visible labels? grouped sections? inline validation? sticky submit?
    - App shell: shared layout? consistent across pages? no nested scroll fights?
    - Components that fail criteria → redesign freely based on style prompt, using the matched block's component patterns as reference.
-6. **Functional components**: Replace raw HTML modals, custom dropdowns, manual selects with Design Anchor functional primitives (`dialog`, `command`, `select`, `popover`, `tabs`). These provide focus trap, keyboard nav, and ARIA roles.
-7. **Effect enhancement**: Use MagicUI, Reactbits, or similar for micro-interactions and state transitions on Functional pages. Hero animations and showcase effects only on Showcase pages.
+6. **Functional components**: Replace raw HTML modals, custom dropdowns, manual selects with Design Anchor functional primitives (`dialog`, `command`, `select`, `popover`, `tabs`) only when they lack focus trap, keyboard nav, ARIA roles, or viewport behavior and no project equivalent exists.
+7. **Effect enhancement**: Prefer existing CSS/Tailwind/project motion utilities for micro-interactions and state transitions. Only add MagicUI, Reactbits, or similar when the user wants a polished production effect, the project can accept the dependency/files, and the effect is central to the experience. Hero animations and showcase effects only on Showcase pages.
 
 8. **Build a token replacement map** for this page (see Token Identification and Replacement Execution, Step 1–3). Scan for hardcoded structural colors (`grep` for Tailwind color classes and hex values). Classify each match. Map hardcoded values to token equivalents.
 
@@ -340,7 +357,8 @@ Before starting any page work, ensure a style prompt is active. This prompt driv
    - Matched block source (e.g., "shadcn/ui dashboard block as scaffold").
    - Current layout → proposed layout based on the matched block.
    - Presentational components failing quality criteria → what will be redesigned and how.
-   - Functional components to install from Design Anchor (dialog, command, etc.).
+   - Functional component decision: reuse existing project component, install a specific Design Anchor primitive, or leave unchanged with reason.
+   - Dependency decision: any new package/component source proposed, why existing dependencies are insufficient, and the smallest install path.
    - Token replacement map: hardcoded structural colors found → token equivalents to apply.
    - AI patterns to address (if any).
    - What stays: business logic, data bindings, API calls, state management.
@@ -348,13 +366,13 @@ Before starting any page work, ensure a style prompt is active. This prompt driv
 
 9. **Wait for per-page confirmation.** The user confirms each page before restructuring begins.
 
-10. **Execute Phase 1 + Phase 2.** Rebuild the layout. Install functional primitives from Design Anchor. Freely design all presentational components. Add effect enhancements. Unify icons. Reorder sections by information priority.
+10. **Execute Phase 1 + Phase 2.** Rebuild the layout. Install only the confirmed missing functional primitives from Design Anchor. Freely design all presentational components. Add effect enhancements only when the per-page dependency decision approves them or existing project utilities can handle them. Unify icons. Reorder sections by information priority.
 
-11. **Execute token replacements** (Step 4). Replace all hardcoded structural colors with token references according to the confirmed map. Verify `tokens.json` values match the product's actual colors.
+11. **Execute token replacements** (Step 4). Replace all hardcoded structural colors with token references according to the confirmed map. Verify root `design-tokens.json` seed values match the product's actual colors.
 
 **Phase 3 — Visual Styling:**
 
-12. **Apply the matched style prompt's visual layer** to the entire page:
+12. **Apply the matched style prompt's visual layer** to the entire page. Use `references/visual-craft.md` as the section-by-section craft workflow:
     - Color palette: primary actions, surface tints, accent backgrounds, status colors — using the prompt's specific hex values.
     - Typography: font pairing, heading weights, letter spacing per the prompt's spec.
     - Shadow/depth/border: per the prompt's surface approach.
@@ -375,9 +393,9 @@ Before starting any page work, ensure a style prompt is active. This prompt driv
 ### Restructuring Rules
 
 - **Redesign the entire page, not patches.** Patching a broken layout produces a patched broken layout. Extract content and business logic, then design from scratch.
-- **Functional components from Design Anchor.** Dialog, command, select, popover, tabs — use `npx design-anchor add`. These provide accessibility behavior that is hard to get right.
+- **Functional components from Design Anchor.** Dialog, command, select, popover, tabs — use `npx design-anchor add` only when needed and confirmed by the per-page plan. Reuse accessible project components when available.
 - **Presentational components freely designed.** Sidebar appearance, data tables, cards, headers, navigation, stat blocks — AI designs whatever looks best based on the style prompt. No library constraint.
-- **Token constraint on structural colors.** All primary buttons, links, active states, focus rings, status colors → reference token CSS variables. Decorative colors are free.
+- **Token constraint on structural colors.** All primary buttons, links, active states, focus rings, status colors → reference semantic token classes / token CSS variables. Decorative colors are free.
 - **Inherit only content and business logic.** From old components, extract data/text/handlers/API calls. Discard position, CSS, DOM structure, inline styles.
 - **Unify icons in the same pass.** Consolidate to a single library.
 - **Preserve all data bindings and business logic.** API calls, state management, data transformations, event handlers, and routing logic stay untouched.
@@ -394,8 +412,8 @@ This path fixes structural color consistency without changing layout, components
 - Align structural anchor colors only: primary interactive elements to the same `primary` token, CTA consistency, status color consistency, interactive state derivation. Do NOT replace decorative or page-specific colors with tokens.
 - Replace raw HTML dialogs/selects/dropdowns with Design Anchor functional primitives if they lack accessibility.
 - Consolidate mixed icon libraries to a single library.
-- Add missing Design Anchor directories and rules through `sync`.
-- Add `.anchor/` to `.gitignore` if missing.
+- Add missing Design Anchor local control-plane files through `sync`.
+- Ensure `.anchor/` is ignored through local git exclude or `.gitignore`.
 - Do not change page layout, section ordering, visual components, or information architecture.
 
 ## Read-Only Audit Scope

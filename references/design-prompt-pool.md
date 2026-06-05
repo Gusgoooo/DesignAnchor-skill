@@ -57,7 +57,7 @@ Write the actual style prompt here.
 2. Pick the best file by matching `best_for`, `keywords`, `density`, `tone`, and `mode` to the user's product context.
 3. Do not expose the internal file name or slug.
 4. Tell the user: `我帮你匹配到一个适合这个场景的风格方向，会先转成 token，再生成页面。`
-5. Save the selected prompt into the target project as `.anchor/design-prompt-source.md` or `design-prompt.md`.
+5. Save the selected prompt into the target project as `.anchor/design-prompt.md` or `design-prompt.md`.
 6. Run `npx design-anchor theme <prompt.md>`.
 7. Use the resulting tokens with the user's product context to generate the first page.
 

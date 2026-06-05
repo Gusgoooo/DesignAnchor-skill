@@ -40,7 +40,7 @@ Do not let the style prompt override:
 
 Use this when the user already gives enough design language to infer token direction.
 
-1. Save the user's prompt into a project-local markdown file, such as `design-prompt.md` or `.anchor/design-prompt-source.md`.
+1. Save the user's prompt into a project-local markdown file, such as `design-prompt.md` or `.anchor/design-prompt.md`.
 2. Run:
 
 ```bash
@@ -71,7 +71,7 @@ Use this when the user asks for a page or product but does not provide enough st
 3. Select one prompt from `design-prompt-pool.md`.
 4. Do not reveal the internal prompt name.
 5. Tell the user: `我帮你匹配到一个适合这个场景的风格方向，会先转成 token，再生成页面。`
-6. Save the selected prompt into `.anchor/design-prompt-source.md` or `design-prompt.md`.
+6. Save the selected prompt into `.anchor/design-prompt.md` or `design-prompt.md`.
 7. Run `npx design-anchor theme <prompt.md>`, then sync and continue page generation.
 
 ## Product Restraint

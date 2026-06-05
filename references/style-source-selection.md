@@ -56,7 +56,7 @@ The existing prompt files are starter examples. New maintainer-added files are e
 ## After Matching
 
 1. Load only the selected prompt file.
-2. Save the prompt into the target project, usually `.anchor/design-prompt-source.md`.
+2. Save the prompt into the target project, usually `.anchor/design-prompt.md`.
 3. Run `npx design-anchor theme <prompt.md>`.
 4. Sync rules with `npx design-anchor sync`.
 5. Generate the first page with functional components from Design Anchor and semantic tokens. Presentational components are freely designed.

@@ -1,6 +1,6 @@
 ---
 name: design-anchor
-description: "面向 React + Tailwind 产品应用。每当用户涉及 UI、主题、布局、组件、token、设计系统治理或产品界面时使用；从第一个页面的设计落地，到第一百个页面的设计一致性，Design Anchor 像设计负责人一样主动判断阶段、引导下一步，并覆盖设计的完整生命周期：开始、维护、审查、修改。"
+description: "面向 React + Tailwind 产品应用。从第一个页面的设计落地，到第一百个页面的设计一致性，Design Anchor 像设计负责人一样主动判断阶段、引导下一步，并覆盖设计的完整生命周期：开始、维护、审查、修改。"
 allowed-tools: "Bash Read Write"
 compatibility: "Node.js >= 18, design-anchor npm package"
 ---

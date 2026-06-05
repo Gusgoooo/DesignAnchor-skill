@@ -20,17 +20,33 @@ Use the internal prompt pool as matching material, not as a visible product sect
 
 ## First Move
 
-When a request touches UI, theme, layout, components, tokens, product screens, SaaS/admin systems, AI tools, dashboards, internal tools, creative tools, developer tools, or any product interface, start visibly:
+When a request touches UI, theme, layout, components, tokens, product screens, SaaS/admin systems, AI tools, dashboards, internal tools, creative tools, developer tools, or any product interface, execute these steps in order:
+
+**Step 1 — Announce:**
 
 `Design Anchor 预检：我会先判断项目成熟度和需求完整度；新页面会先匹配/抽取风格 token，已有完整产品会先征求你确认是否进入治理模式。`
 
-Then inspect the target project before editing when a project directory is available:
+**Step 2 — Probe:**
 
 ```bash
 node "${CLAUDE_SKILL_DIR:-skills/design-anchor}/scripts/probe-design-anchor.mjs" .
 ```
 
 If `CLAUDE_SKILL_DIR` is unavailable and the command cannot resolve, run the same script by absolute path from this skill directory.
+
+**Step 3 — Install runtime if missing:**
+
+If the probe shows `design-anchor` is not installed (no `node_modules/design-anchor`), install it immediately before any UI work:
+
+```bash
+# Detect package manager from lockfiles, then:
+npm install -D design-anchor && npx design-anchor sync
+# or pnpm/yarn/bun equivalent — see Activation Contract below
+```
+
+This is not optional. The runtime provides token CSS generation, AI coding rules, and the `.anchor` control plane. Without it, token governance has no enforcement mechanism.
+
+**Step 4 — Route to the appropriate flow** based on the probe result and request (see Input Router below).
 
 ## Product Model
 

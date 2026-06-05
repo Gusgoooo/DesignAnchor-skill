@@ -4,11 +4,17 @@ Read this when Design Anchor detects a mature existing product. This file is sel
 
 ## Design Philosophy
 
-Most existing products accumulate layout debt over time. Pages built by different developers at different times end up with inconsistent structures: some have sidebars, some do not; some put filters in modals, others inline; icon libraries get mixed; information architecture drifts from what the user's workflow actually needs.
+**Beauty is the ultimate goal. Governance makes beauty sustainable.**
 
-Token compliance and component replacement fix the surface. Layout governance fixes the experience. A product with correct tokens but wrong information hierarchy is still a product that makes the user's job harder than it needs to be.
+Most existing products accumulate layout debt and visual inconsistency over time. Pages built by different developers at different times end up with inconsistent structures, drifting primary colors, mixed icon libraries, and information architectures that no longer match user workflows.
 
-The goal is not to preserve the current layout — it is to give the user a better one.
+Governance fixes this — but governance that strips visual richness is worse than no governance. A product with perfect token compliance but no visual personality is a governance failure. The governed product must look MORE polished and appealing than before, never less.
+
+**What governance does:** locks the structural anchors (primary color, CTA, status colors, interactive states) so they stay consistent across pages. Restructures layout to better serve user tasks. Replaces substandard components with accessible, well-designed ones.
+
+**What governance does NOT do:** replace every color in the codebase with a token reference. Strip decorative accents, gradients, shadows, and page-specific visual treatments. Turn a colorful product into a black-and-white skeleton.
+
+The style prompt defines the visual soul of the product. Governance protects the structural consistency of that soul across 100 pages.
 
 ## User-Facing Introduction
 
@@ -46,7 +52,11 @@ Use these principles to evaluate every page. They replace template matching — 
 
 ## Component Quality Standards (Inline Reference)
 
-When a component does not meet these standards, replace it — do not report, do not patch. Preserve data bindings and event handlers; replace the UI implementation entirely.
+When a component does not meet these standards, replace it entirely — do not report, do not patch.
+
+**Inherit only content and business logic** from the original: data, text, labels, event handlers, API calls, state management. **Do not inherit** the original's layout position, CSS, hardcoded colors, DOM structure, or inline styles — those are discarded. The new component's position comes from the Layout Blueprint (Phase 1); its visual styling comes from the style prompt (Phase 3).
+
+After replacement, apply the product's style prompt visual layer: color palette, shadow treatment, decorative elements, and distinctive styling that make the component look like it was designed for this specific product — not a default library drop-in.
 
 **Sidebar / Navigation:**
 - Must be collapsible to icon-only mode with toggle.
@@ -134,43 +144,42 @@ For each page or major route:
 
 ### Token and Color Consistency Audit
 
-This is one of the highest-value audits. Most existing products have color drift — the same semantic concept expressed as 5 different hardcoded values across components.
+Color governance targets **structural anchors only** — the critical colors that must be consistent across the product. Decorative colors, page-specific accents, gradients, shadows, and intentional one-off styling are preserved as-is. The goal is consistency where it matters, not stripping all color into tokens.
 
-**Hardcoded color scan:**
-- Flag every hex/rgb/hsl value and arbitrary Tailwind color class (`bg-blue-500`, `text-gray-600`, `border-slate-200`) in component files.
-- Each one must be mapped to a semantic token or removed.
+**Important:** Before replacing any color, first extract and preserve the product's existing visual identity. If the product uses rich colors, gradients, or distinctive accent tones, those are intentional design choices. Governance should make the product MORE visually polished, never less.
 
-**Primary color alignment:**
+**Primary color alignment (critical):**
 - Verify that ALL primary interactive elements (buttons, links, active nav items, selected states, toggles, checkboxes, progress bars, focus rings) use the same `primary` token.
 - Flag pages where primary buttons use different colors from each other or from the rest of the product.
+- This is the single highest-value fix — inconsistent primary color across pages is the most visible governance failure.
 
-**Interactive state consistency:**
-- Verify that hover, focus, active, and disabled states are derived from semantic tokens, not independently defined.
+**CTA consistency (critical):**
+- All call-to-action elements must align with primary or a designated accent token.
+- Flag CTAs that drift to random colors across pages.
+
+**Interactive state consistency (critical):**
+- Verify that hover, focus, active, and disabled states are derived from the base token, not independently hardcoded.
 - Flag patterns like `bg-indigo-500 hover:bg-blue-600` (base and hover are unrelated colors).
 - All interactive components must use the same state derivation pattern across the product.
 
-**Surface hierarchy check:**
-- Verify that background surfaces use semantic tokens (`bg-background`, `bg-card`, `bg-popover`) and form a clear visual hierarchy.
-- Flag arbitrary background colors (`bg-gray-50`, `bg-slate-100`) that should be tokenized.
-- Verify sidebar, header, and content area backgrounds are consistent across pages.
+**Status color discipline (critical):**
+- Verify that success/warning/error/info each use consistent colors across the product.
+- Flag mixed shades within a category (e.g., `text-red-500` + `bg-rose-100` + `border-red-300` for the same error concept).
 
-**Border color consistency:**
-- Count distinct border color values across all components.
-- Flag projects using 3+ different gray values for borders — these must be unified to `border-border` and `border-input` tokens.
+**Base text consistency (moderate):**
+- Primary and secondary text colors should be consistent across pages.
+- Flag cases where the same type of text (body, description, timestamp) uses different gray values on different pages.
 
-**Text color tiers:**
-- Verify that text colors map to semantic tiers: `text-foreground` (primary), `text-muted-foreground` (secondary), disabled.
-- Flag ad-hoc text colors (`text-gray-500`, `text-slate-400`, `text-zinc-600`) that should use a tier token.
+**What NOT to touch:**
+- Decorative background colors, accent tones, gradients, and shadows that are part of intentional visual design.
+- Illustration and data visualization colors.
+- Page-specific background tints or card accents.
+- Any color that is clearly an intentional design choice rather than an accidental inconsistency.
+- When in doubt, preserve the existing color.
 
-**Status color discipline:**
-- Verify that success/warning/error/info each use tokenized variants for background, text, and border.
-- Flag mixed shades within a category (e.g., `text-red-500` + `bg-rose-100` + `border-red-300` instead of unified destructive tokens).
-
-**Token naming and coverage:**
-- Token naming conflicts with Design Anchor conventions.
-- Missing semantic token coverage — identify UI concepts that have no token.
-- WCAG AA contrast violations on all token pairs.
-- Dark mode parity — every token must have a dark mode value.
+**WCAG check:**
+- WCAG AA contrast violations on text colors.
+- Dark mode parity for structural anchor tokens only.
 
 ### Navigation Audit
 
@@ -183,52 +192,89 @@ This is one of the highest-value audits. Most existing products have color drift
 
 When the user confirms layout restructuring:
 
-### Per-Page Flow
+### Style Prompt Matching (Before Per-Page Work)
+
+Before starting any page work, ensure a style prompt is active. This prompt drives the page-level beautification phase:
+
+1. Check if the project already has a design prompt source (`.anchor/design-prompt-source.md` or `design-prompt.md`). If yes, reuse it.
+2. If not, select an appropriate prompt from the built-in pool based on the product's type, industry, tone, and density. Use `scripts/list-style-prompts.mjs` or scan `references/b2b-design-prompts/*.md` and match against frontmatter metadata.
+3. If the user provided style direction, use that instead of the pool.
+4. Do not reveal the internal prompt name. Tell the user: `我为你的产品匹配了一个风格方向，会在治理过程中用它来提升页面视觉品质。`
+5. Save the selected prompt into `.anchor/design-prompt-source.md`.
+6. Read `references/style-prompt-guidance.md` before applying.
+
+### Per-Page Flow (follows the Page Rendering Pipeline)
+
+**Phase 1 — Layout Blueprint:**
 
 1. **Read the page source completely.** Understand every component, every data binding, every event handler.
 2. **Identify the page's primary user task** and evaluate the current layout against the quality principles.
-3. **Design the best layout for this page's purpose.** Do not force-fit a template — use the quality principles above as the evaluation standard.
-4. **Present the restructuring plan** before writing code:
-   - Current layout: describe the existing structure and its problems (tied to quality principles).
-   - Proposed layout: describe the target structure.
-   - Components to replace: list each substandard component and its replacement.
+3. **Select the best layout block** for this page's purpose (Dashboard, List, Detail, Form, Settings, Chat, Canvas, Split — see SKILL.md Page Rendering Pipeline). Do not force-fit — modify the block based on actual needs, then verify against quality principles.
+
+**Phase 2 — Component Composition:**
+
+4. **Replace substandard components aggressively.** Prefer full replacement over patching. Every sidebar, table, form, dialog, tabs, and search component that does not meet standards gets completely replaced via Design Anchor. This is not optional — substandard components are the primary source of visual debt.
+5. **Identify 2-3 key touchpoints** for effect enhancement: CTA buttons, hero/header sections, feature highlights, onboarding states. These can use effect libraries (MagicUI, Reactbits) for animated borders, shimmer, spotlight, or motion effects — installed to `src/components/magicui/` or `src/components/effects/`.
+
+**Present the restructuring plan** before writing code:
+   - Current layout → proposed layout block.
+   - Components to replace: list each substandard component and its Design Anchor replacement.
+   - Key touchpoints: which elements get effect enhancement.
    - AI slop to remove: list any absolute ban violations found.
    - What stays: business logic, data bindings, API calls, state management.
-   - What changes: layout structure, component implementations, section ordering, icon library.
-5. **Wait for per-page confirmation.** The user confirms each page before restructuring begins.
-6. **Restructure the page.** Rebuild the UI layer. Replace all substandard components. Unify icons. Remove AI slop patterns. Reorder sections by information priority.
-7. **Run post-change checks:**
-   - `npx design-anchor sync`
-   - `npx design-anchor audit`
-8. **Verify against Production Quality Bar** (from SKILL.md Design Guidance).
-9. **Report what changed** with a Design Anchor self-check line.
+   - What changes: layout structure, component implementations, section ordering, icon library, visual styling.
+
+6. **Wait for per-page confirmation.** The user confirms each page before restructuring begins.
+7. **Execute Phase 1 + Phase 2.** Rebuild the layout. Replace all substandard components with Design Anchor standard implementations. Add effect enhancements to key touchpoints. Unify icons. Remove AI slop patterns. Reorder sections by information priority.
+
+**Phase 3 — Visual Styling:**
+
+8. **Apply the matched style prompt's visual layer** to the entire page on top of the replaced components:
+   - Color palette: primary actions, surface tints, accent backgrounds, status colors — using the prompt's specific hex values.
+   - Typography: font pairing, heading weights, letter spacing per the prompt's spec.
+   - Shadow/depth/border: per the prompt's surface approach.
+   - Signature elements: 2-3 distinctive visual choices from the prompt.
+   - Decorative touches: section background tints, accent borders, card styling, button treatments.
+   - Each replaced component must be visually styled to match the product's design personality — not left as a default library look.
+9. **Verify**: the page now looks professionally designed for this specific product, not like a generic component library demo.
+
+**Post-change:**
+
+10. **Run checks:**
+    - `npx design-anchor sync`
+    - `npx design-anchor audit`
+11. **Verify against Production Quality Bar** (from SKILL.md Design Guidance). Pay special attention to item #1 (visual polish).
+12. **Report what changed** with a Design Anchor self-check line.
 
 ### Restructuring Rules
 
 - **Replace the entire page layout, not patches.** Patching a broken layout produces a patched broken layout.
-- **Replace substandard components immediately.** If a sidebar has no collapse behavior, replace the entire sidebar. If a table uses inline icon soup, replace the entire table. If a form has no section grouping or validation, replace the entire form. Do not fix one property — rewrite to standard.
+- **Replace substandard components completely, then beautify.** If a sidebar has no collapse behavior, replace the entire sidebar. If a table uses inline icon soup, replace the entire table. If a form has no section grouping or validation, replace the entire form. Do not fix one property — rewrite to standard. Inherit only content and business logic from the original; discard its layout position, CSS, and DOM structure. Then apply the product's style prompt visual layer on top (Phase 3). The replaced component must look better than the original.
 - **Use the replacement priority order:** first check `@design`, then `npx design-anchor add`, then write a new component in `src/components/anchor-ui/` following Design Anchor conventions (composable API, semantic token styling, accessibility). Then run `npx design-anchor sync` to register it. Never install UI primitives as direct project dependencies — Design Anchor bundles its own.
 - **Unify icons in the same pass.** Replace all icons to the project's chosen library in the same restructuring pass.
 - **Remove AI slop patterns in the same pass.** Do not leave hero metrics grids, gradient text, or decorative glassmorphism for later.
 - **Preserve all data bindings and business logic.** API calls, state management, data transformations, event handlers, and routing logic stay untouched.
+- **Preserve and enhance visual richness.** Decorative colors, accent backgrounds, gradients, shadows, and intentional styling are design choices — keep them. Only align structural anchors (primary, CTA, status, interactive states) to tokens. If the original page had visual personality, the restructured page must have at least the same level of visual appeal.
 - **Match density to workflow.** Monitoring consoles are dense. Settings pages breathe. Do not apply one density everywhere.
 - **One page per confirmation.** Restructure one page, let the user see the result, then continue.
 
 ### Component Replacement Announcement
 
-For each component replaced, report:
+For each component replaced, report both phases:
 
-`Design Anchor 组件治理：[原组件描述] → [新组件]。原因：[具体不达标项]。`
+`Design Anchor 组件治理：[原组件描述] → [新组件] + [视觉美化]。原因：[具体不达标项]。`
 
-Example: `Design Anchor 组件治理：自定义 div sidebar（无折叠、无分组、icon 混用）→ 标准 Sidebar 组件（可折叠、分组导航、统一 lucide icon）。`
+Example: `Design Anchor 组件治理：自定义 div sidebar（无折叠、无分组、icon 混用）→ 标准 Sidebar 组件（可折叠、分组导航、统一 lucide icon）+ 应用产品风格（深色侧边栏、品牌色 active 指示器、柔和阴影过渡）。`
 
 ## Progressive Optimization Execution
 
 When the user chooses progressive optimization instead of layout restructuring:
 
-This path fixes token compliance and component quality without changing page-level layout or information architecture.
+This path fixes structural color consistency and component quality without changing page-level layout or information architecture. Preserve all intentional visual design choices — decorative colors, accents, gradients, and shadows stay as-is.
 
-- Replace hardcoded colors with semantic tokens. Align all primary interactive elements to the same `primary` token. Unify hover/focus/active state derivation across all components. Establish consistent surface hierarchy, border colors, and text color tiers.
+**Style prompt matching is still required.** Follow the same "Style Prompt Matching" steps above. Even in progressive mode, replaced components must be beautified per the matched prompt, and each page gets a visual enhancement pass (within the existing layout).
+
+- Align structural anchor colors only: primary interactive elements to the same `primary` token, CTA consistency, status color consistency, interactive state derivation. Do NOT replace decorative or page-specific colors with tokens.
 - Replace raw HTML primitives with governed components.
 - **Replace substandard components that violate Component Quality Standards** — even in progressive mode, a sidebar with no collapse, a table with icon soup, or a form with no validation should be replaced. The page layout stays the same but the components inside it get upgraded.
 - Remove AI slop patterns (absolute bans) within existing components.
@@ -248,7 +294,7 @@ Scan and report everything listed in the audit scope above. Produce a structured
 1. **Summary**: overall governance score and top 3 issues.
 2. **Per-page analysis**: for each major page/route, report layout quality, component quality (with specific standard violations), icon consistency, and AI slop violations.
 3. **Component replacement plan**: list every substandard component, what standard it violates, and what it should be replaced with.
-4. **Token and color consistency audit**: hardcoded values, primary color misalignment across pages, inconsistent hover/focus states, surface hierarchy gaps, border color fragmentation, text tier violations, status color mixing, contrast violations, dark mode parity.
+4. **Structural color audit**: primary color misalignment across pages, CTA inconsistency, inconsistent hover/focus state derivation, status color mixing, contrast violations. Note: decorative and intentional colors are not flagged.
 5. **Recommended action**: whether layout restructuring or progressive optimization is more appropriate, and why.
 
 No files should be edited in read-only audit.

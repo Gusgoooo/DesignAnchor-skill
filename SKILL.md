@@ -78,54 +78,47 @@ After producing UI, run this meta-check: the first generation of AI defaults (he
 
 If your output matches a second-order default, redesign. The goal is to serve the user's task, not to look anti-AI.
 
+### Visual Quality Priority
+
+Token governance exists to enforce structural consistency — not to strip visual richness. A governed product must look MORE polished and appealing than before governance, never less. If a page looks black-and-white, monochrome, or "wireframe-like" after governance, the governance failed.
+
+**Style prompt drives beauty.** The style prompt (user-provided or internally matched) defines the product's visual soul: color palette richness, gradient usage, shadow depth, surface treatment, accent tones, illustration style. Token governance then locks the structural anchors (primary, CTA, status) so they stay consistent across pages — but it does NOT replace every color in the codebase with a token reference.
+
+**Components provide structure, not aesthetics.** Design Anchor components ensure interaction quality (accessibility, keyboard nav, state completeness). The visual beauty of pages — color richness, spacing rhythm, typographic feel, surface depth — comes from the style prompt and developer's intentional design choices. Do not over-rely on components to make pages look good. A page with perfect component governance but no visual personality is a governance failure.
+
+**Design personality is mandatory.** Every product must have visible design personality from its style prompt: distinctive color palette, intentional typography pairing, specific shadow/depth treatment, and 2-3 signature elements that make it recognizable. If the generated page looks like a generic Tailwind/shadcn default, the style prompt was not applied deeply enough.
+
+A comprehensive style prompt covers: design philosophy, color strategy with specific hex values, typography system with font pairings, surface and depth approach, component visual styling specifications, effects and micro-interactions, signature bold elements, and style-specific anti-patterns. Thin prompts (just mood keywords) produce thin visuals. See `references/style-prompt-guidance.md` and `references/b2b-design-prompts/_template.md` for the full specification.
+
+**Balance rule:** After any governance action, the page should look at least as visually appealing as before. If governance made it look worse (plainer, less colorful, more generic), undo the visual regression and preserve the original aesthetic choices while only fixing the structural anchors.
+
 ### Color
 
+Color governance targets **structural anchors only** — the handful of colors that must be consistent across the entire product. All other colors (decorative accents, illustration colors, page-specific backgrounds, gradients, shadows) are intentional design choices and should be preserved.
+
+**What to govern (structural anchors):**
+- Primary interactive color: buttons, links, active nav, selected states, toggles, checkboxes, focus rings → must all use the same `primary` token.
+- CTA / call-to-action elements → must align with primary or a designated accent token.
+- Status colors: success, warning, error, info → must use semantic tokens (`bg-destructive`, `text-destructive`, etc.) consistently.
+- Base text colors: primary text (`text-foreground`), secondary text (`text-muted-foreground`) → must be consistent across pages.
+- Interactive states: hover, focus, active, disabled → must be derived from the base token, not independently hardcoded. Wrong: `bg-indigo-500 hover:bg-blue-600`. Right: `bg-primary hover:bg-primary/90`.
+
+**What NOT to govern (preserve as-is):**
+- Page-specific decorative colors, accent backgrounds, gradients, and shadows that contribute to visual richness.
+- Illustration and data visualization colors.
+- Tailwind utility colors used for intentional one-off styling (a specific card background tint, a subtle highlight).
+- Colors in third-party embedded content.
+- Any color that is clearly an intentional design choice rather than an accidental inconsistency.
+
+**How to distinguish:** An accidental inconsistency is when the same semantic concept (e.g., "primary button") appears in two different colors across pages. An intentional design choice is when a specific element has a unique color for a clear visual reason (e.g., a warm background on a welcome section, a gradient on a feature card). When in doubt, preserve the existing color — do not convert it to a token.
+
 **Contrast and encoding:**
-- All text must meet WCAG 2.1 AA contrast ratio (4.5:1 for normal text, 3:1 for large text). No exceptions.
-- Never use gray text lighter than `text-muted-foreground` token. If a token does not exist, create one that passes contrast.
+- All text must meet WCAG 2.1 AA contrast ratio (4.5:1 for normal text, 3:1 for large text).
 - Color must not be the only way to convey information. Pair color with icons, text, or patterns.
 
-**No hardcoded colors:**
-- Do not hardcode hex/rgb/hsl values. Use semantic token classes (`bg-primary`, `text-foreground`, `border-border`).
-- Do not use arbitrary Tailwind color values (`bg-blue-500`, `text-gray-600`, `border-slate-200`). Use token-mapped classes.
-- Every color in the codebase must trace back to a semantic token. If a component uses a color that has no token, create the token or replace the color.
-
-**Primary color consistency:**
-- All primary interactive elements use the same primary token: buttons, links, active navigation, selected items, toggles, checkboxes, radio buttons, progress bars, focus rings.
-- A product must have exactly one primary color across all pages. If page A has blue primary buttons and page B has purple primary buttons, this is a governance failure.
-- Secondary/accent colors are permitted but must also be tokenized and used consistently. Do not invent per-component accent colors.
-
-**Interactive state tokens:**
-- Hover, focus, active, and disabled states must be derived from semantic tokens, not independently hardcoded.
-- Wrong: `bg-indigo-500 hover:bg-blue-600` — two unrelated colors for base and hover.
-- Right: `bg-primary hover:bg-primary/90` — hover derived from the same token.
-- All interactive components must use the same state derivation pattern. If buttons use `hover:bg-primary/90`, links and nav items must use the same hover pattern, not a different opacity or a completely different color.
-- Disabled states use a consistent opacity or muted token, not per-component gray values.
-
-**Surface hierarchy:**
-- Background surfaces form a clear visual hierarchy using semantic tokens: page background (`bg-background`) → card/container (`bg-card`) → popover/dialog (`bg-popover`) → tooltip.
-- Each level must use its semantic token. No arbitrary `bg-gray-50`, `bg-slate-100`, or `bg-zinc-900` scattered across components.
-- Sidebar, header, and content area backgrounds must be intentional and consistent — not three random grays that happen to be close.
-
-**Border consistency:**
-- One border color token for standard borders (`border-border`), one for input borders (`border-input`), one for focus rings (`ring-ring`).
-- Not five different gray values across components. If a card uses `border-gray-200`, a table uses `border-slate-300`, and a dialog uses `border-neutral-200`, this is a governance failure — all must use `border-border`.
-
-**Text color tiers:**
-- Three tiers only: primary text (`text-foreground`), secondary/muted text (`text-muted-foreground`), disabled text.
-- Labels, headings, and body text use `text-foreground`. Descriptions, timestamps, and supplementary info use `text-muted-foreground`.
-- Do not create ad-hoc text color variations (`text-gray-500` here, `text-slate-400` there, `text-zinc-600` elsewhere). Map them all to the appropriate tier token.
-
-**Status color discipline:**
-- Four semantic status categories: success (green), warning (amber/yellow), error/destructive (red), info (blue).
-- Each category has tokenized variants for background, text, and border: `bg-destructive`, `text-destructive`, `border-destructive`.
-- Do not mix shades within a category. Wrong: `text-red-500` for error text but `bg-rose-100` for error background and `border-red-300` for error border — these should all be semantic tokens from the same destructive palette.
-- Do not invent new status color categories. If you need a "pending" or "draft" state, use `muted` tokens or an existing category with a label, not a new color.
-
 **Dark mode:**
-- Dark mode is not "invert all colors." Dark surfaces need adjusted contrast ratios, reduced saturation, and elevated surface layers.
-- Every semantic token must have a dark mode value. No components that break in dark mode because they used a hardcoded light-theme color.
-- Test all surface hierarchy levels in dark mode — the visual distinction between background layers must remain clear.
+- Structural anchor tokens must have dark mode values.
+- Decorative colors that break in dark mode should be adjusted, but do not strip them — replace with dark-mode-appropriate equivalents that maintain the same visual richness.
 
 ### Typography
 
@@ -155,18 +148,19 @@ If your output matches a second-order default, redesign. The goal is to serve th
 
 Every UI output must meet this minimum bar before delivery. If any item fails, fix it before reporting the task as complete.
 
-1. All text passes WCAG AA contrast.
-2. Every interactive element has hover and focus states.
-3. Empty state, loading state, and error state are handled — not blank areas or console errors.
-4. Layout does not break at common viewport widths (320px, 768px, 1024px, 1440px).
-5. No hardcoded colors — all colors use semantic tokens.
-6. Primary color is consistent — all primary buttons, links, active states, and focus rings use the same `primary` token across every page.
-7. Interactive states (hover, focus, active, disabled) are token-derived and consistent across all components.
-8. No mixed icon libraries.
-9. All form fields have visible labels.
-10. Destructive actions are visually distinguished and gated.
-11. Keyboard navigation works for all interactive elements.
-12. Page renders without layout shift (no elements jumping after load).
+1. **Visual polish** — the page looks polished, colorful, and appealing. Not a wireframe, not black-and-white, not a plain skeleton. If governance stripped visual richness, restore it.
+2. All text passes WCAG AA contrast.
+3. Every interactive element has hover and focus states.
+4. Empty state, loading state, and error state are handled — not blank areas or console errors.
+5. Layout does not break at common viewport widths (320px, 768px, 1024px, 1440px).
+6. Structural anchor colors (primary, CTA, status) use semantic tokens consistently. Other decorative colors are preserved.
+7. Primary color is consistent — all primary buttons, links, active states, and focus rings use the same `primary` token across every page.
+8. Interactive states (hover, focus, active, disabled) are token-derived and consistent across all components.
+9. No mixed icon libraries.
+10. All form fields have visible labels.
+11. Destructive actions are visually distinguished and gated.
+12. Keyboard navigation works for all interactive elements.
+13. Page renders without layout shift (no elements jumping after load).
 
 ## Activation Contract
 
@@ -236,13 +230,14 @@ Use this when the project appears complete or already has substantial product UI
 Before any file changes:
 
 1. Run read-only inspection including layout analysis, icon audit, and information architecture assessment.
-2. Present the situation with confidence: the product will benefit from layout restructuring, not just token fixes.
-3. Recommend a new git branch.
-4. Offer exactly these choices:
-   - `布局重构`（推荐）: read each page, classify screen type, restructure layout, replace components, unify icons, reorder information architecture. Preserves all business logic and data bindings.
-   - `渐进优化`: only fix token compliance, import paths, and raw primitive replacement. Keeps existing layout unchanged.
+2. **Match a style prompt for beautification.** Even for existing products, select an appropriate prompt from the prompt pool (via `scripts/list-style-prompts.mjs` or scanning `references/b2b-design-prompts/*.md`) based on the product's type, tone, and density. If the user has provided style direction, use that instead. If a design prompt source already exists in the project (`.anchor/design-prompt-source.md` or `design-prompt.md`), reuse it. This prompt drives the page-level beautification phase after structural governance.
+3. Present the situation with confidence: the product will benefit from layout restructuring, not just token fixes.
+4. Recommend a new git branch.
+5. Offer exactly these choices:
+   - `布局重构`（推荐）: read each page, classify screen type, restructure layout, replace components, unify icons, reorder information architecture, **then apply page-level beautification from matched style prompt**. Preserves all business logic and data bindings.
+   - `渐进优化`: only fix token compliance, import paths, and raw primitive replacement. Keeps existing layout unchanged. **Still applies style prompt beautification to replaced components.**
    - `只读审计`: scan and report only; no file changes.
-5. Wait for the user to confirm. Do not treat silence, vague approval, or a different feature request as consent.
+6. Wait for the user to confirm. Do not treat silence, vague approval, or a different feature request as consent.
 
 Allowed explicit confirmations include phrases such as `确认，开始重构`, `开始布局重构`, `restructure`, `渐进优化`, `只读审计`, or `我同意，开始`.
 
@@ -255,9 +250,8 @@ Use this when the user provides a design prompt, brand direction, visual recipe,
 1. Ensure the runtime is installed and synced.
 2. Save the prompt into a project-local markdown file, such as `design-prompt.md` or `.anchor/design-prompt-source.md`.
 3. Run `npx design-anchor theme <prompt-file.md>`.
-4. Treat the extracted aesthetic as a light layer for density, hierarchy, rhythm, surface tone, and atmosphere.
-5. Keep component specs, semantic tokens, accessibility, and product workflow stronger than the prompt.
-6. Run `npx design-anchor sync`; run `npx design-anchor audit` when UI changed.
+4. Apply the extracted aesthetic as the visual foundation: color palette, typography, shadow/depth, component styling, signature elements. The style prompt drives every visual decision within structural constraints (accessibility, layout governance, component interaction quality).
+5. Run `npx design-anchor sync`; run `npx design-anchor audit` when UI changed.
 
 Read `references/style-prompt-guidance.md` before using a style prompt.
 
@@ -280,19 +274,92 @@ Use this when the user gives a vague product need, such as `做一个 CRM 后台
 
 Use this when the user asks for any product interface: admin system, dashboard, SaaS app, AI assistant, chat tool, CRM, internal tool, developer tool, creative tool, monitoring console, or any functional product screen.
 
-1. Infer roles, objects, workflows, page purpose, and density from the request.
-2. Ensure there is an active style source: either the user's detailed prompt or an internally matched prompt.
-3. Build the actual usable screen or flow, not a marketing landing page.
-4. Read `references/layout-governance.md` and apply layout quality principles. Design the best layout for this page's purpose — do not force-fit a template.
-5. Make the first page feel impressive through information architecture, density, layout rhythm, meaningful data, state design, and interaction affordances.
-6. Compose from existing `@design` components and add only the missing components.
-7. Keep the look purposeful: polished and memorable, but not decorative-heavy.
+**Follow the Page Rendering Pipeline (three phases in order):**
+
+1. **Phase 1 — Layout Blueprint:** Infer roles, objects, workflows, page purpose, and density. Select the appropriate layout block. Read `references/layout-governance.md` and apply layout quality principles. Define the spatial structure.
+2. **Phase 2 — Component Composition:** Fill layout slots with Design Anchor components. Identify 2-3 key touchpoints (CTA, hero, feature highlight) and enhance with effect libraries (MagicUI, Reactbits) where appropriate.
+3. **Phase 3 — Visual Styling:** Ensure a comprehensive style prompt is active (user-provided or internally matched). Apply the full visual personality: color palette, typography, shadow/depth, signature elements, decorative touches.
+
+The first page must feel impressive — not through decorative excess, but through visual personality, confident composition, effect-enhanced key moments, meaningful data, and polished states.
 
 Read `references/b2b-product-context.md` before creating product screens.
 
 ### Design System Inspection
 
 Use Portal only when the user asks to view, tune, inspect, audit, or document the design system state. Read `references/portal-routing.md` when routing is ambiguous.
+
+## Page Rendering Pipeline
+
+Every page — whether new or restructured — follows three phases in strict order. Do not skip phases or mix their concerns.
+
+### Phase 1: Layout Blueprint (布局蓝图)
+
+Determine the page's spatial structure before touching any component or color. This phase answers: what goes where.
+
+1. **Identify page purpose.** Read `references/b2b-product-context.md` to classify: consumption, collection management, single record focus, creation/editing, configuration, conversation, canvas, or workflow orchestration.
+2. **Select a layout block.** A layout block is a compositional pattern — the high-level spatial arrangement of sections on the page. Common blocks:
+
+   | Block | Structure | When to Use |
+   |---|---|---|
+   | **Dashboard** | stats header → chart/visualization area → data table | Monitoring, analytics, overview pages |
+   | **List** | search/filter bar → data table/grid → pagination | Collection browsing, queues, inboxes |
+   | **Detail** | entity header (title + status + actions) → content sections → related items (sidebar or bottom) | Single record, profile, order, ticket view |
+   | **Form** | section groups → field clusters → sticky submit bar | Creation, editing, settings with many fields |
+   | **Settings** | sidebar category nav → content panel | Configuration, preferences, account |
+   | **Chat** | conversation area (scrollable) → input bar (bottom-fixed) → optional side panel | Messaging, AI assistant, support |
+   | **Canvas** | toolbar (top/side) → workspace (center, maximized) → properties panel (collapsible right) | Editor, builder, whiteboard, design tool |
+   | **Split** | master list (left) → detail panel (right) | Email, file manager, two-pane navigation |
+
+   Blocks are starting points, not mandatory templates. Modify freely based on the page's actual needs, then verify against layout quality principles.
+
+3. **Define section ordering** by user workflow priority — not by data model structure.
+4. **Set density** to match the task: dense for monitoring, balanced for CRUD, focused for content, minimal for creative work.
+
+Output of Phase 1: a spatial wireframe — section names, positions, and relative sizes. No components, no colors.
+
+### Phase 2: Component Composition (组件填充)
+
+Fill each layout slot with the right component. This phase answers: what renders in each section.
+
+**Structural components — use Design Anchor:**
+- Sidebar, data table, form fields, dialog, tabs, command palette, app shell → `npx design-anchor add <component>`.
+- These provide interaction quality: accessibility, keyboard navigation, state completeness, ARIA roles.
+
+**Key touchpoint effects — allow effect libraries:**
+- CTA buttons, hero sections, feature highlights, onboarding cards, premium interactive moments → may use effect libraries for visual enhancement:
+  - **MagicUI** (`@/components/magicui/`): animated borders, shimmer buttons, spotlight effects, animated gradients, text reveal.
+  - **Reactbits** or similar: animated hover effects, interactive cards, motion text, transition effects.
+- Effect libraries are **supplements on top of** Design Anchor components, not replacements. The CTA is still a Design Anchor button — MagicUI adds the shimmer.
+- **Limit: 2-3 key touchpoints per page.** Effects on every element dilute their impact and create visual noise.
+- Install effect components to `src/components/magicui/` or `src/components/effects/`, not scattered across the codebase.
+
+**What gets effects vs what stays clean:**
+
+| Gets effects (2-3 per page) | Stays clean |
+|---|---|
+| Primary CTA button | Navigation / sidebar |
+| Hero section / page header | Data tables |
+| Feature highlight card | Forms / inputs |
+| Onboarding / empty state | Settings panels |
+| Key status indicator | Standard list items |
+
+Output of Phase 2: all layout slots filled with components. Key touchpoints identified and enhanced. Functional but not yet styled.
+
+### Phase 3: Visual Styling (风格绘制)
+
+Apply the matched style prompt as the aesthetic layer across the entire page. This phase answers: how everything looks and feels as a whole.
+
+1. **Ensure a style prompt is active.** Either the user's own prompt, an internally matched prompt from the pool, or the project's existing design prompt source.
+2. **Apply color palette** — primary actions, surface tints, accent backgrounds, section colors, status colors. Use the prompt's specific hex values, not generic defaults.
+3. **Apply typography** — font pairing, heading weights, body sizes, letter spacing, line height per the prompt's spec.
+4. **Apply surface and depth** — shadow approach, border treatment, border radius, surface layering per the prompt's philosophy.
+5. **Apply signature elements** — 2-3 distinctive visual choices from the prompt that give the page its recognizable personality.
+6. **Apply decorative touches** — subtle section background tints, accent borders, card treatments, gradient accents where the prompt specifies.
+7. **Verify visual quality** — the page looks professionally designed for this specific product. Run the Visual Quality Checklist from `style-prompt-guidance.md`.
+
+Output of Phase 3: a complete, visually polished page that looks like it was designed by a professional for this specific product.
+
+**The three phases are sequential and non-negotiable.** Phase 1 without Phase 3 produces a wireframe. Phase 3 without Phase 1 produces a pretty mess. Phase 2 without Phase 3 produces a generic component library demo.
 
 ## UI Coding Rules
 
@@ -303,10 +370,11 @@ Before writing UI, inspect `@design`, `src/components/anchor-ui`, project tokens
 - Prefer imports from `@design`; otherwise use `@/components/anchor-ui`.
 - Do not import component implementations from `.anchor/` or `node_modules/design-anchor/`.
 - Add only needed components with `npx design-anchor add <component>`.
-- Use Design Anchor components instead of raw governed primitives such as buttons, inputs, dialogs, tabs, selects, tables, cards, and menus.
-- Use semantic token classes such as `bg-primary`, `text-muted-foreground`, `border-border`, and `rounded-lg`.
-- Do not hardcode colors or arbitrary token-sensitive Tailwind values.
+- Use Design Anchor components for structural/interactive primitives: buttons, inputs, dialogs, tabs, selects, tables, cards, and menus.
+- Effect libraries (MagicUI, Reactbits, etc.) are allowed only for key touchpoint enhancement — CTA, hero, feature highlights. Install to `src/components/magicui/` or `src/components/effects/`. Never use effects as structural component replacements.
+- Use semantic token classes for structural anchors (primary, CTA, status, base text). Preserve intentional decorative colors.
 - Keep component implementation changes in `src/components/anchor-ui/`.
+- Components provide interaction quality (accessibility, keyboard nav, states). Visual personality comes from the style prompt and effect enhancements — do not expect bare components alone to make pages beautiful.
 - Keep token edits in `src/design-tokens/tokens.json`, then sync generated CSS/rules.
 
 ### Component Replacement Rules (Enforced)
@@ -317,11 +385,31 @@ Substandard means: raw HTML where a governed component exists, visually broken o
 
 **All component replacements must go through Design Anchor.** Do not introduce external component libraries directly — Design Anchor is the single entry point for governed components.
 
-Replacement flow:
+Replacement flow (two phases — structure first, then beauty):
+
+**Phase 1: Complete structural replacement**
 1. Check if the component already exists in `@design` or `src/components/anchor-ui/`.
 2. If not, run `npx design-anchor add <component>` to install from Design Anchor's component registry.
 3. If Design Anchor does not have the component yet, write a new one in `src/components/anchor-ui/` that conforms to Design Anchor conventions (composable API, semantic token styling, accessibility). Then run `npx design-anchor sync` to register it and generate its spec.
 4. **Never** install Radix, cmdk, @tanstack/react-table, or other UI primitives as direct project dependencies just because a component needs them. Design Anchor bundles its own primitives — the `add` command handles the dependency chain.
+
+**What to inherit from the original component — ONLY:**
+- Content: data, text, labels, values, items.
+- Business logic: event handlers, API calls, state management, data transformations, routing.
+
+**What NOT to inherit:**
+- Layout position or placement — the new component's position is determined by Phase 1 (Layout Blueprint), not by where the old component sat.
+- CSS / styling / hardcoded colors — the new component uses Design Anchor conventions and gets styled in Phase 3.
+- DOM structure / wrapper divs — the new component has its own composable structure.
+- Inline styles, arbitrary Tailwind classes, or ad-hoc responsive hacks from the original.
+
+The old component is a data source, not a template. Extract its content and logic, discard everything else.
+
+**Phase 2: Apply visual styling from the style prompt**
+5. After replacing to standard implementation, apply the project's style prompt visual layer on top: color palette, shadow/depth treatment, border radius, typography weight, spacing rhythm, and decorative elements (accent borders, background tints, subtle gradients, icon styling) that match the product's design personality.
+6. A replaced component must look **better** than the original, not just structurally correct. If the standard component looks plain or generic, add visual richness from the style prompt until it matches the product's aesthetic quality.
+
+**The replaced component should feel like it was designed for this specific product — not like a default library component dropped in.**
 
 Key components that must meet Design Anchor quality standards — replace on sight if they do not:
 
@@ -337,7 +425,7 @@ After every component replacement, verify with `npx design-anchor audit` and che
 
 When replacing:
 
-`Design Anchor 组件治理：[component] 不符合规范，已通过 design-anchor add 替换为标准实现。`
+`Design Anchor 组件治理：[component] 不符合规范，已替换为标准实现并应用产品风格。`
 
 ### Layout Rules
 
@@ -411,25 +499,26 @@ Design Anchor 布局治理：已根据页面用途重构布局。
 ### Component replacement
 
 ```
-Design Anchor 组件治理：[原组件描述] → [新组件]。原因：[具体不达标项]。
+Design Anchor 组件治理：[原组件描述] → [新组件] + [视觉美化]。原因：[具体不达标项]。
 ```
 
-Example: `Design Anchor 组件治理：自定义 div sidebar（无折叠、无分组、icon 混用）→ 标准 Sidebar 组件（可折叠、分组导航、统一 icon）。`
+Example: `Design Anchor 组件治理：自定义 div sidebar（无折叠、无分组、icon 混用）→ 标准 Sidebar 组件（可折叠、分组导航、统一 icon）+ 应用产品风格（深色侧边栏、品牌色 active 指示器）。`
 
 ### Self-check (required on every UI change)
 
 Every response that changes UI must end with a `Design Anchor 自检` line covering:
 
+- Visual quality (page looks polished and appealing, not stripped or plain)
 - Layout quality (purpose-layout fit, information hierarchy)
 - Component reuse (governed components used, replacements made)
 - Icon consistency (single library, uniform size)
-- Token compliance (no hardcoded colors, primary aligned, states derived)
+- Token compliance (structural anchors consistent: primary, CTA, status, interactive states)
 - Auto-fixes applied
 - Unresolved items requiring user confirmation
 - Sync / audit status
 
 ```
-Design Anchor 自检：布局 ✓ | 组件 ✓ | icon ✓ | token ✓ | 自动修复 0 | 待确认 0 | sync ✓ audit ✓
+Design Anchor 自检：视觉 ✓ | 布局 ✓ | 组件 ✓ | icon ✓ | token ✓ | 自动修复 0 | 待确认 0 | sync ✓ audit ✓
 ```
 
 ## References

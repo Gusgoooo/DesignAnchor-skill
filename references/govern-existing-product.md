@@ -216,9 +216,8 @@ For every hardcoded color found, classify it:
 | Classification | Action | Example |
 |---|---|---|
 | **Primary interactive** — button, link, active nav, selected state, toggle, checkbox, focus ring | Replace with `primary` token | `bg-blue-600` → `bg-primary`, `text-blue-600` → `text-primary` |
-| **Primary hover** — hover state of a primary element | Replace with dedicated hover token or brightness | `hover:bg-blue-700` → `hover:bg-primary-hover` or `hover:brightness-95` |
-| **Primary focus ring** — focus indicator | Replace with ring token | `focus:ring-blue-500` → `focus:ring-ring` |
-| **Primary disabled** — disabled state of a primary element | Replace with muted token | `bg-blue-300` → `bg-muted` + `text-muted-foreground` + `pointer-events-none` |
+| **Primary hover/focus/active** — interactive state of a primary element | Replace with token-derived state | `hover:bg-blue-700` → `hover:bg-primary/90`, `focus:ring-blue-500` → `focus:ring-ring` |
+| **Primary disabled** — disabled state of a primary element | Replace with token + opacity | `bg-blue-300` → `bg-primary/50` or `bg-muted` |
 | **Destructive** — delete buttons, error messages, error borders | Replace with `destructive` token | `bg-red-600` → `bg-destructive`, `text-red-500` → `text-destructive` |
 | **Success** — success messages, completion indicators | Replace with semantic token | `text-green-600` → `text-success` or define `--success` token |
 | **Warning** — warning messages, caution indicators | Replace with semantic token | `text-yellow-600` → `text-warning` or define `--warning` token |
@@ -229,10 +228,7 @@ For every hardcoded color found, classify it:
 | **Decorative** — accent tints, illustration colors, gradients, shadows, page-specific backgrounds | **Keep as-is** | `bg-gradient-to-r from-purple-500 to-pink-500` → preserve |
 | **Data visualization** — chart colors, graph segments | **Keep as-is** | preserve all chart colors |
 
-**Alpha modifier warning:** Do NOT use Tailwind's `/90` opacity modifier on token colors (e.g., `bg-primary/90`, `border-destructive/30`). This only works when CSS variables are defined as bare color channels (e.g., `--primary: 222.2 47.4% 11.2%`). If tokens are full color values (e.g., `--primary: #4f46e5` or `--primary: hsl(…)`), the modifier silently fails. Instead:
-- Hover states: use `hover:brightness-95` (darkens slightly) or define a `--primary-hover` token
-- Disabled states: use `bg-muted` + `text-muted-foreground`
-- Borders with reduced opacity: define dedicated border tokens or use `border-primary` with `opacity-30` if the border is the only element
+**Alpha modifiers work in Tailwind v4.** `bg-primary/90`, `border-destructive/30`, `text-muted-foreground/80` all generate correct `color-mix(in oklab, var(...) N%, transparent)` CSS with `@supports` fallback. Use them freely for hover states, subtle borders, and layered surfaces.
 
 #### Step 3: Build a replacement map per project
 
@@ -242,14 +238,14 @@ Before making changes, build a concrete mapping table for the specific project. 
 Project uses indigo as primary:
   bg-indigo-600       → bg-primary
   text-indigo-600     → text-primary
-  hover:bg-indigo-700 → hover:brightness-95  (or hover:bg-primary-hover if token exists)
+  hover:bg-indigo-700 → hover:bg-primary/90
   ring-indigo-500     → ring-ring
-  border-indigo-300   → border-primary
+  border-indigo-300   → border-primary/30
 
 Project uses gray-900 as text:
   text-gray-900       → text-foreground
   text-gray-500       → text-muted-foreground
-  text-gray-400       → text-muted-foreground
+  text-gray-400       → text-muted-foreground/80
 
 Project uses white/gray-50 as surfaces:
   bg-white            → bg-background  (only for page/card surfaces, not decorative)
@@ -259,7 +255,7 @@ Project uses white/gray-50 as surfaces:
 Project uses red for errors:
   bg-red-600          → bg-destructive
   text-red-600        → text-destructive
-  border-red-300      → border-destructive
+  border-red-300      → border-destructive/30
 ```
 
 Present this mapping to the user as part of the per-page restructuring plan. Let them confirm before applying.

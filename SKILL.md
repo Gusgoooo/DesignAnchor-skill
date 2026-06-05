@@ -66,6 +66,15 @@ Keep the current Design Anchor boundaries clear:
 
 These rules are constitutional. They override stylistic preferences, user prompts, and internal style matching. Every UI output must pass these checks before delivery.
 
+### File Discipline
+
+**Do not create new files.** Edit existing files in the project. The only exceptions:
+- Files explicitly requested by the user (e.g., "新建一个页面")
+- Files created by Design Anchor CLI commands (`npx design-anchor add`, `sync`, `theme`)
+- The design prompt source file (`.anchor/design-prompt-source.md` or `design-prompt.md`) when saving a style prompt
+
+Everything else — utility functions, helper modules, config files, type definitions, wrapper components, intermediate files — must go into existing files or not be created at all. When adding a component or section, add it to the existing page file. When adding a utility, add it to the existing utils file. Never split code into new files without the user explicitly asking for it.
+
 ### AI Pattern Awareness
 
 Be aware of common AI-generated UI patterns that can make output feel generic. These are not bans — a good designer might use any of these intentionally. The problem is when they appear by default, without thought:
@@ -107,7 +116,7 @@ Color governance targets **structural anchors only** — the handful of colors t
 - CTA / call-to-action elements → must align with primary or a designated accent token.
 - Status colors: success, warning, error, info → must use semantic tokens (`bg-destructive`, `text-destructive`, etc.) consistently.
 - Base text colors: primary text (`text-foreground`), secondary text (`text-muted-foreground`) → must be consistent across pages.
-- Interactive states: hover, focus, active, disabled → must be derived from the base token, not independently hardcoded. Wrong: `bg-indigo-500 hover:bg-blue-600`. Right: `bg-primary hover:brightness-95` or define a `--primary-hover` token. Do NOT use `/90` alpha modifiers on token colors (e.g., `bg-primary/90`) — this silently fails when CSS variables are full color values instead of bare channels.
+- Interactive states: hover, focus, active, disabled → must be derived from the base token, not independently hardcoded. Wrong: `bg-indigo-500 hover:bg-blue-600`. Right: `bg-primary hover:bg-primary/90`. Tailwind v4 uses `color-mix()` to handle alpha modifiers on CSS variable colors, so `bg-primary/90`, `border-border/50`, `text-muted-foreground/80` all work correctly.
 
 **What NOT to govern (preserve as-is):**
 - Page-specific decorative colors, accent backgrounds, gradients, and shadows that contribute to visual richness.

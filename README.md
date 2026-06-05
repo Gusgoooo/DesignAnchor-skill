@@ -102,8 +102,8 @@ npx design-anchor audit   # 合规检查
 
 ```bash
 # 1. 安装 Skill（Claude Code 项目级）
-mkdir -p .claude/skills
-cp -R design-anchor .claude/skills/design-anchor
+mkdir -p .claude/skills/design-anchor
+cp SKILL.md scripts/ references/ agents/ .claude/skills/design-anchor/ -r
 
 # 2. 安装运行时
 npm install -D design-anchor
@@ -112,9 +112,9 @@ npm install -D design-anchor
 npx design-anchor sync
 ```
 
-全局安装：`cp -R design-anchor ~/.claude/skills/design-anchor`
+全局安装：复制到 `~/.claude/skills/design-anchor/`
 
-Claude.ai 上传：`zip -r design-anchor.zip design-anchor` 后上传 zip。
+Claude.ai 上传：将 SKILL.md + scripts/ + references/ + agents/ 打包为 zip（顶层目录名为 `design-anchor`）后上传。
 
 ## 命令速查
 
@@ -130,7 +130,6 @@ Claude.ai 上传：`zip -r design-anchor.zip design-anchor` 后上传 zip。
 ## 架构
 
 ```
-design-anchor/
 ├── SKILL.md                        # AI 入口 — 路由、规则、设计宪法
 ├── scripts/
 │   ├── probe-design-anchor.mjs     # 项目预检（成熟度 / 技术栈 / icon / 布局）
